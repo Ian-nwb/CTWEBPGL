@@ -7,7 +7,7 @@ return (
 <p>
 Name: Ian Kenneth R. Sianghio<br />
 Email: kennethsianghio756@gmail.com<br   /> 
-Other Personal Info: Professional Lebron James Glazer
+Other Personal Info: Professional Lebron James Glazer.
 </p>
 </header>
 </div>
