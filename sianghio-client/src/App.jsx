@@ -7,10 +7,15 @@ return (
 <p>
 Name: Ian Kenneth R. Sianghio<br />
 Email: kennethsianghio756@gmail.com<br   /> 
+Section: INF231<br />
 Other Personal Info: Professional Lebron James Glazer.
 </p>
+<a href="https://github.com/Ian-nwb" target="_blank" rel="noopener noreferrer">
+  GitHub Link
+</a>
 </header>
 </div>
+
 );
 }
 export default App;
