@@ -1,6 +1,5 @@
 import Button from '../components/Button';
 
-// Image Imports
 import main from '../assets/images/main.png';
 import image1 from '../assets/images/image1.png';
 import image2 from '../assets/images/image2.png';
@@ -39,7 +38,6 @@ const AboutPage = () => {
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           
-          {/* Top Left - main Image */}
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex min-h-72 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
               <img
@@ -70,7 +68,6 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Profile Overview */}
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
@@ -96,7 +93,6 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Stacked Content + Visual Grid Section */}
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
@@ -116,7 +112,6 @@ const AboutPage = () => {
             </div>
           </div>
 
-          {/* Visual Grid */}
           <div className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
               Visual Grid
