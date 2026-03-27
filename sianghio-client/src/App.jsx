@@ -1,21 +1,40 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-import React from 'react'; import './App.css';
+// HomePage Structure
+import Layout from './components/Layout';
+import ArticlePage from './pages/ArticlePage';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+
+const routes = [
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        path: '',
+        element: <HomePage />,
+      },
+      {
+        path: 'about',
+        element: <AboutPage />,
+      },
+      {
+        path: 'articles',
+        element: <ArticlePage />,
+      },
+    ],
+  },
+];
+
+const router = createBrowserRouter(routes);
+
 function App() {
-return (
-<div className="App">
-<header className="App-header"> <h1>Welcome to My React App!</h1>
-<p>
-Name: Ian Kenneth R. Sianghio<br />
-Email: kennethsianghio756@gmail.com<br   /> 
-Section: INF231<br />
-Other Personal Info: Professional Lebron James Glazer.
-</p>
-<a href="https://github.com/Ian-nwb" target="_blank" rel="noopener noreferrer">
-  GitHub Link
-</a>
-</header>
-</div>
-
-);
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 }
+
 export default App;
