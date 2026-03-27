@@ -1,7 +1,7 @@
 import Button from '../components/Button';
 
 // Image Imports
-import edmund from '../assets/images/edmund.png';
+import main from '../assets/images/main.png';
 import image1 from '../assets/images/image1.png';
 import image2 from '../assets/images/image2.png';
 import image3 from '../assets/images/image3.png';
@@ -39,12 +39,12 @@ const AboutPage = () => {
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           
-          {/* Top Left - Edmund Image */}
+          {/* Top Left - main Image */}
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex min-h-72 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
               <img
-                src={edmund}
-                alt="Edmund"
+                src={main}
+                alt="main"
                 className="h-full w-full object-cover"
               />
             </div>

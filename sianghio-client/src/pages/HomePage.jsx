@@ -1,7 +1,7 @@
 import Button from '../components/Button';
 
 // Image Imports
-import edmund from '../assets/images/edmund.png';
+import main from '../assets/images/main.png';
 import image1 from '../assets/images/image1.png';
 import image2 from '../assets/images/image2.png';
 import image3 from '../assets/images/image3.png';
@@ -45,12 +45,12 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Edmund Image - Unchanged */}
+          {/* main Image - Unchanged */}
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex min-h-64 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
               <img
-                src={edmund}
-                alt="Edmund"
+                src={main}
+                alt="main"
                 className="h-full w-full object-cover"
               />
             </div>
