@@ -78,10 +78,10 @@ const AboutPage = () => {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: 'Years', value: '05' },
-            { label: 'Projects', value: '16' },
-            { label: 'Clients', value: '09' },
-            { label: 'Focus Areas', value: '03' },
+            { label: 'Years', value: '01' },
+            { label: 'Projects', value: '4' },
+            { label: 'Clients', value: '3' },
+            { label: 'Focus Areas', value: 'wala gagi' },
           ].map((stat, i) => (
             <div key={i} className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
               <p className="text-2xl font-bold text-zinc-900">{stat.value}</p>
