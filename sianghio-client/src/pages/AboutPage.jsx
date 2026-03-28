@@ -81,7 +81,7 @@ const AboutPage = () => {
             { label: 'Years', value: '01' },
             { label: 'Projects', value: '4' },
             { label: 'Clients', value: '3' },
-            { label: 'Focus Areas', value: 'wala gagi' },
+            { label: 'Focus Areas', value: 'wala' },
           ].map((stat, i) => (
             <div key={i} className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
               <p className="text-2xl font-bold text-zinc-900">{stat.value}</p>
