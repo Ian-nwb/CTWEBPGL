@@ -1,10 +1,10 @@
-import Button from '../components/Button';
+import Button from '../../components/Button';
 
 
-import main from '../assets/images/main.png';
-import image1 from '../assets/images/image1.png';
-import image2 from '../assets/images/image2.png';
-import image3 from '../assets/images/image3.png';
+import main from '../../assets/images/main.png';
+import image1 from '../../assets/images/image1.png';
+import image2 from '../../assets/images/image2.png';
+import image3 from '../../assets/images/image3.png';
 
 const HomePage = () => {
   const featureCards = [

@@ -1,10 +1,10 @@
-import Button from '../components/Button';
+import Button from '../../components/Button';
 
-import main from '../assets/images/main.png';
-import image1 from '../assets/images/image1.png';
-import image2 from '../assets/images/image2.png';
-import image3 from '../assets/images/image3.png';
-import image4 from '../assets/images/image4.png';
+import main from '../../assets/images/main.png';
+import image1 from '../../assets/images/image1.png';
+import image2 from '../../assets/images/image2.png';
+import image3 from '../../assets/images/image3.png';
+import image4 from '../../assets/images/image4.png';
 
 const AboutPage = () => {
   const visualImages = [image1, image2, image3, image4];
