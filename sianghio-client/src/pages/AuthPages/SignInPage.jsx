@@ -1,79 +1,85 @@
 import { Link } from 'react-router-dom';
 import Button from '../../components/Button';
 
-const inputClasses = 
-'mt-2 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-4 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:bg-zinc-50';
-
-const actionButtonClassName = 'w-full rounded-xl py-3 text-[11px] tracking-[0.2em]';
-
 const SignInPage = () => {
   return (
     <>
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Log In</h1>
-      <p className="mt-3 text-sm leading-6 text-zinc-600">
-        Access your account using the same monochrome wireframe language used across the site.
-      </p>
+      <div className="mb-8">
+        <h1 className="text-4xl font-semibold tracking-tight text-zinc-900">Welcome back</h1>
+        <p className="mt-3 text-zinc-600">
+          Sign in to access your Centaim workspace
+        </p>
+      </div>
 
-      <form className="mt-8 space-y-5">
+      <form className="space-y-6">
         <div>
-          <label htmlFor="signin-email" className="text-sm font-medium text-zinc-700">
-            Email Address
+          <label htmlFor="email" className="text-sm font-medium text-zinc-700">
+            Email address
           </label>
           <input 
-            id="signin-email"
+            id="email"
             type="email"
-            placeholder="Placeholder"
+            placeholder="you@company.com"
             autoComplete="email"
-            className={inputClasses}
+            className="mt-2 w-full rounded-2xl border border-zinc-300 bg-white px-5 py-3.5 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition"
           />
         </div>
 
         <div>
-          <label htmlFor="signin-password" className="text-sm font-medium text-zinc-700">
+          <label htmlFor="password" className="text-sm font-medium text-zinc-700">
             Password
           </label>
           <input 
-            id="signin-password"
+            id="password"
             type="password"
-            placeholder="Placeholder"
+            placeholder="••••••••"
             autoComplete="current-password"
-            className={inputClasses}
+            className="mt-2 w-full rounded-2xl border border-zinc-300 bg-white px-5 py-3.5 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 outline-none transition"
           />
-          <p className="mt-2 text-xs leading-5 text-zinc-500">
-            It must be a combination of minimum 8 letters, numbers, and symbols.
-          </p>
         </div>
 
-        <div className="flex items-center justify-between gap-4 text-sm">
-          <label className="flex items-center gap-2 text-zinc-600">
-            <input type="checkbox" className="h-4 w-4 rounded border-zinc-300 accent-zinc-900" />
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2 text-zinc-600 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="h-4 w-4 rounded border-zinc-300 accent-black" 
+            />
             <span>Remember me</span>
           </label>
-          <button type="button" className="font-medium text-zinc-700 transition hover:text-zinc-900">
-            Forgot Password?
-          </button>
+          <Link to="/auth/forgot-password" className="font-medium text-zinc-700 hover:text-zinc-900 transition">
+            Forgot password?
+          </Link>
         </div>
 
-        <Button type="submit" variant="primary" className={actionButtonClassName}>
-          Log In
+        <Button type="submit" variant="primary" className="w-full py-3.5 text-base font-medium">
+          Sign In
         </Button>
 
-        <div className="grid gap-3 pt-2 sm:grid-cols-2">
-          <Button type="button" variant="secondary" className={actionButtonClassName}>
-            Log In with Google
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-zinc-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-widest text-zinc-400">
+            <span className="bg-white px-4">or continue with</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Button type="button" variant="secondary" className="py-3 text-sm font-medium">
+            Google
           </Button>
-          <Button type="button" variant="secondary" className={actionButtonClassName}>
-            Log In with Apple
+          <Button type="button" variant="secondary" className="py-3 text-sm font-medium">
+            Apple
           </Button>
         </div>
       </form>
 
-      <div className="mt-8 border-t border-zinc-200 pt-6 text-sm text-zinc-600">
-        No account yet?{' '}
-        <Link to="/auth/signup" className="font-semibold text-zinc-900 transition hover:text-zinc-600">
-          Sign Up
+      <p className="mt-10 text-center text-sm text-zinc-600">
+        Don't have an account?{' '}
+        <Link to="/auth/signup" className="font-semibold text-zinc-900 hover:text-black transition">
+          Sign up free
         </Link>
-      </div>
+      </p>
     </>
   );
 };
