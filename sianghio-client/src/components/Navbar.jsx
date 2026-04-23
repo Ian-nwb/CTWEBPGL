@@ -21,13 +21,12 @@ const NavBar = () => {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         
-        {/* Logo Section */}
+
         <NavLink to="/" className="flex items-center gap-3">
           <img src={logo} alt="Centaim Logo" className="h-10 w-auto" />
           <span className="text-xl font-bold text-zinc-900 tracking-tighter">Centaim</span>
         </NavLink>
 
-        {/* Main Navigation */}
         <nav className="hidden items-center gap-2 md:flex">
           {links.map((link) => (
             <NavLink
@@ -41,7 +40,6 @@ const NavBar = () => {
           ))}
         </nav>
 
-        {/* Auth Waypoints */}
         <div className="flex items-center gap-4">
           <Link 
             to="/auth/signin" 

@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 // HomePage Structure
 import Layout from './layouts/Layout';
 import ArticlePage from './pages/LandingPages/ArticlePage';
@@ -12,7 +12,12 @@ import SignInPage from './pages/AuthPages/SignInPage';
 import SignUpPage from './pages/AuthPages/SignUpPage';
 
 import NotFoundPage from './pages/NotFoundPage';
-
+// Dashboard Structure
+import DashLayout from './layouts/DashLayout';
+import DashboardPage from './pages/DashboardPages/DashboardPage';
+import ReportsPage from './pages/DashboardPages/ReportsPage';
+import UsersPage from './pages/DashboardPages/UsersPage';
+const theme = createTheme();
 const routes = [
   {
     path: '/',
@@ -52,6 +57,25 @@ const routes = [
       },
     ],
   },
+  {
+    path: "dashboard/",
+    element: <DashLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        path: "",
+        element: <DashboardPage />,
+      },
+      {
+        path: "reports",
+        element: <ReportsPage />,
+      },
+      {
+        path: "users",
+        element: <UsersPage />,
+      },
+    ],
+  },
 ];
 
 const router = createBrowserRouter(routes);
@@ -59,7 +83,9 @@ const router = createBrowserRouter(routes);
 function App() {
   return (
     <>
+    <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
+      </ThemeProvider>
     </>
   );
 }
