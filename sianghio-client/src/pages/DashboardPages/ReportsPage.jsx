@@ -1,292 +1,341 @@
 import React, { useState } from "react";
-import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
-  Divider,
   Stack,
+  Chip,
+  Avatar,
+  Button,
   ToggleButton,
   ToggleButtonGroup,
-  Chip,
+  Divider,
+  LinearProgress,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import PeopleIcon from "@mui/icons-material/People";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import SpeedIcon from "@mui/icons-material/Speed";
+import MemoryIcon from "@mui/icons-material/Memory";
+import StorageIcon from "@mui/icons-material/Storage";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
-/**
- * --- STYLING CONFIGURATION ---
- * Optimized for FULL WIDTH to eliminate dead space.
- */
+// ── Data ─────────────────────────────────────────────────────────────────────
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const revenueData  = [41000,38000,55000,49000,63000,58000,72000,80000,68000,85000,91000,104000];
+const expensesData = [28000,22000,41000,33000,52000,44000,50000,59000,47000,61000,63000,74000];
 
-const styles = {
-  pageWrapper: {
-    minHeight: "100vh",
-    bgcolor: "#f8fafc",
-    p: { xs: 2, md: 4 }, // Fluid padding
-    width: "100%",
-    boxSizing: "border-box",
+const kpis = [
+  {
+    label: "Total Revenue",
+    value: "$104K",
+    delta: "+14%",
+    positive: true,
+    spark: [41,38,55,49,63,58,72,80,68,85,91,104],
+    icon: <AttachMoneyIcon />,
+    iconBg: "#e3f2fd",
+    iconColor: "#1976d2",
   },
-  // Main Card styling - expanded and responsive
-  card: {
-    borderRadius: 4,
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e2e8f0",
-    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-    "&:hover": {
-      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-    },
+  {
+    label: "Active Users",
+    value: "3,841",
+    delta: "+9%",
+    positive: true,
+    spark: [30,45,28,80,49,90,68,85,91,77,95,110],
+    icon: <PeopleIcon />,
+    iconBg: "#e8f5e9",
+    iconColor: "#388e3c",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    mb: 2,
+  {
+    label: "Reports Filed",
+    value: "340",
+    delta: "+5%",
+    positive: true,
+    spark: [5,8,6,10,9,14,11,13,16,15,19,22],
+    icon: <BarChartIcon />,
+    iconBg: "#fff3e0",
+    iconColor: "#f57c00",
   },
-  toggleGroup: (theme) => ({
-    bgcolor: "#f1f5f9",
-    p: 0.5,
-    borderRadius: 2,
-    "& .MuiToggleButtonGroup-grouped": {
-      border: 0,
-      px: 2,
-      borderRadius: 1.5,
-      "&.Mui-selected": {
-        bgcolor: "#fff",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-        color: theme.palette.primary.main,
-        "&:hover": { bgcolor: "#fff" },
-      },
-    },
-  }),
-  gauge: {
-    [`& .${gaugeClasses.valueText}`]: {
-      fontSize: 28,
-      fontWeight: 800,
-      fontFamily: "Inter, sans-serif",
-    },
+  {
+    label: "Conversion Rate",
+    value: "6.2%",
+    delta: "-0.3%",
+    positive: false,
+    spark: [6.5,6.8,6.4,6.9,6.3,6.7,6.5,6.2,6.4,6.1,6.3,6.2],
+    icon: <TrendingUpIcon />,
+    iconBg: "#fce4ec",
+    iconColor: "#c62828",
   },
-};
+];
 
-/**
- * --- DATA CONFIGURATION ---
- */
-
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const revenueData = [4000, 3000, 5000, 4780, 5890, 4800, 6500, 7200, 6100, 7800, 8200, 9100];
-const expensesData = [2400, 1398, 3800, 2908, 4800, 3800, 4300, 5100, 4200, 5300, 5700, 6200];
-
-const quarterlyBarData = [
-  { data: [35, 44, 24, 34], label: "Series 1" },
-  { data: [51, 6, 49, 30], label: "Series 2" },
+const quarterSeries = [
+  { data: [42,58,47,63], label: "Revenue",  color: "#1976d2" },
+  { data: [30,39,34,48], label: "Expenses", color: "#f57c00" },
 ];
 
 const pieData = [
-  { id: 0, value: 35, label: "Dashboard" },
-  { id: 1, value: 25, label: "Reports" },
-  { id: 2, value: 20, label: "Users" },
-  { id: 3, value: 20, label: "Others" },
+  { id: 0, value: 38, label: "Direct" },
+  { id: 1, value: 27, label: "Organic" },
+  { id: 2, value: 20, label: "Referral" },
+  { id: 3, value: 15, label: "Social" },
+];
+const pieColors = ["#1976d2","#388e3c","#f57c00","#7b1fa2"];
+
+const topPages = [
+  { page: "/dashboard",  views: 12840, pct: 92 },
+  { page: "/reports",    views: 8310,  pct: 60 },
+  { page: "/users",      views: 5420,  pct: 39 },
+  { page: "/settings",   views: 3200,  pct: 23 },
+  { page: "/billing",    views: 1870,  pct: 13 },
 ];
 
-const sparkData = {
-  users: [30, 45, 28, 80, 49, 90, 68, 85, 91, 77, 95, 110],
-  revenue: [12, 18, 14, 22, 19, 30, 25, 28, 35, 32, 40, 48],
-  reports: [5, 8, 6, 10, 9, 14, 11, 13, 16, 15, 19, 22],
-};
-
-/**
- * --- MAIN COMPONENT ---
- */
-
-function ReportsPage() {
-  const theme = useTheme();
-  const [chartType, setChartType] = useState("bar");
-
-  const kpiCards = [
-    { label: "Monthly Users", data: sparkData.users, value: "1,284", trend: "+12%", color: theme.palette.primary.main },
-    { label: "Revenue (K)", data: sparkData.revenue, value: "$48.3K", trend: "+8.4%", color: theme.palette.success.main },
-    { label: "Reports Filed", data: sparkData.reports, value: "340", trend: "+5%", color: theme.palette.warning.main },
-  ];
+// ── Component ─────────────────────────────────────────────────────────────────
+export default function ReportsPage() {
+  const [chartMode, setChartMode] = useState("bar");
 
   return (
-    <Box sx={styles.pageWrapper}>
-      {/* Page Header - Left Aligned to match dashboard style */}
-      <Box mb={4} ml={1}>
-        <Typography variant="h4" fontWeight={800} color="text.primary" gutterBottom>
-          Reports & Analytics
-        </Typography>
-        <Typography variant="body1" color="text.secondary" fontWeight={400}>
-          A comprehensive visual summary of platform performance and key metrics.
-        </Typography>
-      </Box>
+    <Box sx={{ p: 3 }}>
+      {/* Header */}
+      <Typography variant="h4" fontWeight={700} gutterBottom>
+        Reports & Analytics
+      </Typography>
+      <Typography variant="body2" color="text.secondary" mb={3}>
+        A comprehensive visual summary of platform performance and key metrics.
+      </Typography>
 
-      {/* Top Row: KPI Cards - Uses full width grid */}
-      <Grid container spacing={3} mb={3}>
-        {kpiCards.map((kpi) => (
-          <Grid item xs={12} sm={6} md={4} key={kpi.label}>
-            <Card elevation={0} sx={styles.card}>
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight={700} textTransform="uppercase">
-                    {kpi.label}
-                  </Typography>
-                  <Chip
-                    label={kpi.trend}
-                    size="small"
-                    color={kpi.trend.startsWith("+") ? "success" : "error"}
-                    sx={{ fontWeight: 800, borderRadius: 1.5 }}
-                  />
-                </Stack>
-                <Typography variant="h3" fontWeight={800} color="text.primary" mb={1}>
-                  {kpi.value}
-                </Typography>
-                <Box sx={{ mt: 2, height: 80 }}>
-                  <SparkLineChart
-                    data={kpi.data}
-                    height={80}
-                    color={kpi.color}
-                    curve="natural"
-                    area
-                    showHighlight
-                    showTooltip
-                  />
+      {/* ── ROW 1: KPI Summary Cards ── */}
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
+        {kpis.map((k) => (
+          <Card key={k.label} elevation={2} sx={{ borderRadius: 3, flex: 1 }}>
+            <CardContent sx={{ py: 2 }}>
+              <Stack direction="row" spacing={2} alignItems="flex-start">
+                <Avatar sx={{ bgcolor: k.iconBg, color: k.iconColor, width: 44, height: 44 }}>
+                  {k.icon}
+                </Avatar>
+                <Box flex={1}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2" color="text.secondary">{k.label}</Typography>
+                    <Chip
+                      size="small"
+                      icon={k.positive ? <TrendingUpIcon sx={{ fontSize: "14px !important" }} /> : <TrendingDownIcon sx={{ fontSize: "14px !important" }} />}
+                      label={k.delta}
+                      color={k.positive ? "success" : "error"}
+                      variant="outlined"
+                      sx={{ fontWeight: 700, fontSize: 11 }}
+                    />
+                  </Stack>
+                  <Typography variant="h5" fontWeight={700} mt={0.3}>{k.value}</Typography>
+                  <Box sx={{ mt: 1, height: 44 }}>
+                    <SparkLineChart
+                      data={k.spark}
+                      height={44}
+                      color={k.iconColor}
+                      curve="natural"
+                      area
+                      showHighlight
+                      showTooltip
+                    />
+                  </Box>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+              </Stack>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Stack>
 
-      {/* Middle Row: Financials and System Health */}
-      <Grid container spacing={3} mb={3}>
-        {/* Revenue vs Expenses - Larger proportion */}
-        <Grid item xs={12} lg={8}>
-          <Card elevation={0} sx={styles.card}>
-            <CardContent sx={{ p: 3 }}>
-              <Stack sx={styles.header}>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>Revenue vs Expenses</Typography>
-                  <Typography variant="caption" color="text.secondary">Annual financial growth comparison</Typography>
-                </Box>
-                <Chip label="2024 Annual" variant="outlined" sx={{ borderRadius: 1.5, fontWeight: 600 }} />
-              </Stack>
-              <Divider sx={{ my: 3 }} />
-              <Box sx={{ width: "100%", height: 400 }}>
-                <LineChart
-                  xAxis={[{ scaleType: "point", data: months }]}
-                  series={[
-                    { data: revenueData, label: "Revenue", color: theme.palette.primary.main, curve: "natural", area: true },
-                    { data: expensesData, label: "Expenses", color: theme.palette.error.main, curve: "natural", area: true },
-                  ]}
-                  margin={{ left: 50, right: 20, top: 20, bottom: 40 }}
-                />
+      {/* ── ROW 2: Revenue Line Chart + System Health ── */}
+      <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={3}>
+        {/* Revenue vs Expenses */}
+        <Card elevation={2} sx={{ borderRadius: 3, flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1}>
+              <Box>
+                <Typography variant="h6" fontWeight={600}>Revenue vs Expenses</Typography>
+                <Typography variant="caption" color="text.secondary">Annual financial comparison</Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+              <Chip
+                icon={<CalendarMonthIcon sx={{ fontSize: "14px !important" }} />}
+                label="2024 Annual"
+                variant="outlined"
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            </Stack>
+            <Divider sx={{ my: 1.5 }} />
+            <LineChart
+              xAxis={[{ scaleType: "point", data: months }]}
+              series={[
+                { data: revenueData,  label: "Revenue",  color: "#1976d2", curve: "natural", area: true, showMark: false },
+                { data: expensesData, label: "Expenses", color: "#f57c00", curve: "natural", area: true, showMark: false },
+              ]}
+              height={260}
+              margin={{ left: 64, right: 20, top: 16, bottom: 36 }}
+            />
+          </CardContent>
+        </Card>
 
-        {/* System Health Gauges */}
-        <Grid item xs={12} lg={4}>
-          <Card elevation={0} sx={styles.card}>
-            <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
-              <Typography variant="h6" fontWeight={700} gutterBottom>System Health</Typography>
-              <Typography variant="caption" color="text.secondary" display="block" mb={2}>Real-time utilization</Typography>
-              <Divider sx={{ mb: 4 }} />
-              <Stack spacing={2} alignItems="center" justifyContent="center" flexGrow={1}>
-                <Box textAlign="center" width="100%">
-                  <Typography variant="body2" fontWeight={700} color="text.secondary" mb={1}>CPU LOAD</Typography>
-                  <Gauge width={200} height={140} value={72} startAngle={-110} endAngle={110} sx={styles.gauge} />
+        {/* System Health */}
+        <Card elevation={2} sx={{ borderRadius: 3, width: { xs: "100%", lg: 300 }, flexShrink: 0 }}>
+          <CardContent sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" fontWeight={600}>System Health</Typography>
+            <Typography variant="caption" color="text.secondary">Real-time utilization</Typography>
+            <Divider sx={{ my: 1.5 }} />
+            <Stack flex={1} justifyContent="space-evenly">
+              {[
+                { label: "CPU Load",      value: 72, icon: <SpeedIcon />,  iconBg: "#e3f2fd", iconColor: "#1976d2", chipColor: "primary" },
+                { label: "Memory Usage",  value: 55, icon: <MemoryIcon />, iconBg: "#e8f5e9", iconColor: "#388e3c", chipColor: "success" },
+                { label: "Disk Usage",    value: 38, icon: <StorageIcon />,iconBg: "#fff3e0", iconColor: "#f57c00", chipColor: "warning" },
+              ].map((g) => (
+                <Box key={g.label}>
+                  <Stack direction="row" alignItems="center" spacing={1.5} mb={0.5}>
+                    <Avatar sx={{ bgcolor: g.iconBg, color: g.iconColor, width: 32, height: 32 }}>
+                      {React.cloneElement(g.icon, { sx: { fontSize: 18 } })}
+                    </Avatar>
+                    <Typography variant="body2" fontWeight={600} flex={1}>{g.label}</Typography>
+                    <Chip label={`${g.value}%`} size="small" color={g.chipColor} variant="outlined" sx={{ fontWeight: 700, minWidth: 52 }} />
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={g.value}
+                    color={g.chipColor}
+                    sx={{ borderRadius: 2, height: 6, bgcolor: "#f5f5f5", ml: 5.5 }}
+                  />
                 </Box>
-                <Box textAlign="center" width="100%">
-                  <Typography variant="body2" fontWeight={700} color="text.secondary" mb={1}>MEMORY USAGE</Typography>
-                  <Gauge width={200} height={140} value={55} startAngle={-110} endAngle={110} sx={styles.gauge} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
 
-      {/* Bottom Row: Growth and Distribution */}
-      <Grid container spacing={3}>
+      {/* ── ROW 3: Quarterly + Pie + Top Pages ── */}
+      <Stack direction={{ xs: "column", lg: "row" }} spacing={2}>
         {/* Quarterly Growth */}
-        <Grid item xs={12} lg={7}>
-          <Card elevation={0} sx={styles.card}>
-            <CardContent sx={{ p: 3 }}>
-              <Stack sx={styles.header}>
-                <Typography variant="h6" fontWeight={700}>Quarterly Growth</Typography>
-                <ToggleButtonGroup
-                  size="small"
-                  value={chartType}
-                  exclusive
-                  onChange={(_, val) => val && setChartType(val)}
-                  sx={styles.toggleGroup(theme)}
-                >
-                  <ToggleButton value="bar">BAR</ToggleButton>
-                  <ToggleButton value="line">LINE</ToggleButton>
-                </ToggleButtonGroup>
-              </Stack>
-              <Divider sx={{ my: 3 }} />
-              <Box sx={{ width: "100%", height: 350 }}>
-                {chartType === "bar" ? (
-                  <BarChart
-                    series={quarterlyBarData}
-                    xAxis={[{ data: ["Q1", "Q2", "Q3", "Q4"], scaleType: "band" }]}
-                    margin={{ left: 40, right: 20, top: 10, bottom: 40 }}
-                  />
-                ) : (
-                  <LineChart
-                    series={quarterlyBarData.map((s) => ({ ...s, curve: "natural" }))}
-                    xAxis={[{ data: ["Q1", "Q2", "Q3", "Q4"], scaleType: "point" }]}
-                    margin={{ left: 40, right: 20, top: 10, bottom: 40 }}
-                  />
-                )}
+        <Card elevation={2} sx={{ borderRadius: 3, flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+              <Box>
+                <Typography variant="h6" fontWeight={600}>Quarterly Growth</Typography>
+                <Typography variant="caption" color="text.secondary">Revenue & Expenses by quarter</Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Traffic Distribution */}
-        <Grid item xs={12} lg={5}>
-          <Card elevation={0} sx={styles.card}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={700} gutterBottom>Traffic Distribution</Typography>
-              <Typography variant="caption" color="text.secondary" display="block" mb={2}>Engagement by section</Typography>
-              <Divider sx={{ mb: 3 }} />
-              <Box sx={{ width: "100%", height: 350, display: "flex", justifyContent: "center" }}>
-                <PieChart
-                  series={[{
-                    data: pieData,
-                    innerRadius: 80,
-                    outerRadius: 120,
-                    paddingAngle: 4,
-                    cornerRadius: 8,
-                    highlightScope: { faded: "global", highlighted: "item" },
-                  }]}
-                  margin={{ top: 0, bottom: 100, left: 0, right: 0 }}
-                  slotProps={{
-                    legend: {
-                      direction: "row",
-                      position: { vertical: "bottom", horizontal: "middle" },
-                      padding: 0,
-                      labelStyle: { fontSize: 13, fontWeight: 600 },
+              <ToggleButtonGroup
+                size="small"
+                value={chartMode}
+                exclusive
+                onChange={(_, v) => v && setChartMode(v)}
+                sx={{
+                  bgcolor: "#f5f5f5",
+                  p: 0.4,
+                  borderRadius: 2,
+                  "& .MuiToggleButtonGroup-grouped": {
+                    border: 0,
+                    px: 1.5,
+                    borderRadius: 1.5,
+                    fontWeight: 700,
+                    fontSize: 11,
+                    "&.Mui-selected": {
+                      bgcolor: "#fff",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+                      color: "#1976d2",
                     },
-                  }}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+                  },
+                }}
+              >
+                <ToggleButton value="bar">BAR</ToggleButton>
+                <ToggleButton value="line">LINE</ToggleButton>
+              </ToggleButtonGroup>
+            </Stack>
+            <Divider sx={{ my: 1.5 }} />
+            {chartMode === "bar" ? (
+              <BarChart
+                series={quarterSeries}
+                xAxis={[{ data: ["Q1","Q2","Q3","Q4"], scaleType: "band" }]}
+                height={240}
+                margin={{ left: 44, right: 16, top: 12, bottom: 36 }}
+              />
+            ) : (
+              <LineChart
+                series={quarterSeries.map((s) => ({ ...s, curve: "natural", showMark: false }))}
+                xAxis={[{ data: ["Q1","Q2","Q3","Q4"], scaleType: "point" }]}
+                height={240}
+                margin={{ left: 44, right: 16, top: 12, bottom: 36 }}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Traffic Pie */}
+        <Card elevation={2} sx={{ borderRadius: 3, width: { xs: "100%", lg: 280 }, flexShrink: 0 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={600}>Traffic Sources</Typography>
+            <Typography variant="caption" color="text.secondary">Engagement by channel</Typography>
+            <Divider sx={{ my: 1.5 }} />
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <PieChart
+                series={[{
+                  data: pieData,
+                  innerRadius: 55,
+                  outerRadius: 90,
+                  paddingAngle: 3,
+                  cornerRadius: 4,
+                  colors: pieColors,
+                  highlightScope: { faded: "global", highlighted: "item" },
+                }]}
+                height={190}
+                margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                slotProps={{ legend: { hidden: true } }}
+              />
+            </Box>
+            <Stack spacing={1} mt={1}>
+              {pieData.map((p, i) => (
+                <Stack key={p.id} direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: pieColors[i] }} />
+                    <Typography variant="body2" color="text.secondary">{p.label}</Typography>
+                  </Stack>
+                  <Typography variant="body2" fontWeight={700}>{p.value}%</Typography>
+                </Stack>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Top Pages */}
+        <Card elevation={2} sx={{ borderRadius: 3, width: { xs: "100%", lg: 280 }, flexShrink: 0 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={600}>Top Pages</Typography>
+            <Typography variant="caption" color="text.secondary">Most visited pages</Typography>
+            <Divider sx={{ my: 1.5 }} />
+            <Stack spacing={2}>
+              {topPages.map((p, i) => (
+                <Box key={p.page}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Avatar sx={{ width: 22, height: 22, fontSize: 11, fontWeight: 700, bgcolor: "#e3f2fd", color: "#1976d2" }}>
+                        {i + 1}
+                      </Avatar>
+                      <Typography variant="body2" fontWeight={600}>{p.page}</Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">{p.views.toLocaleString()}</Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={p.pct}
+                    sx={{ borderRadius: 2, height: 5, bgcolor: "#f5f5f5", ml: 3.5 }}
+                  />
+                </Box>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
     </Box>
   );
 }
-
-export default ReportsPage;
