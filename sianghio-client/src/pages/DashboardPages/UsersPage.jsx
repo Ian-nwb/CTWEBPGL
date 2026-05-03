@@ -1,254 +1,303 @@
-import React, { useState } from "react";
+import { useState, useMemo } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Chip,
-  Stack,
-  Button,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Tooltip,
-  Divider,
-} from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import SearchIcon from "@mui/icons-material/Search";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import PeopleIcon from "@mui/icons-material/People";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import BlockIcon from "@mui/icons-material/Block";
+  Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent,
+  DialogTitle, FormControlLabel, IconButton, InputAdornment, MenuItem,
+  Paper, Stack, Switch, TextField, Typography, useMediaQuery, InputBase
+} from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
+import { 
+  Visibility, VisibilityOff, Search as SearchIcon, 
+  PictureAsPdf as PdfIcon, PersonAdd as AddIcon 
+} from '@mui/icons-material';
+import { DataGrid } from '@mui/x-data-grid';
+import usersSeed from "../../assets/users.json?raw";
 
-const avatarColors = ["#1976d2", "#388e3c", "#f57c00", "#7b1fa2", "#d32f2f", "#0288d1", "#455a64", "#c62828", "#2e7d32"];
+const roles = ['admin', 'editor', 'viewer'];
+const genders = ['male', 'female', 'other'];
 
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 14, role: "Admin", status: "Active", email: "jon.snow@example.com", joined: "2023-01-15" },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 31, role: "Editor", status: "Active", email: "cersei.l@example.com", joined: "2023-02-20" },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 31, role: "Viewer", status: "Inactive", email: "jaime.l@example.com", joined: "2023-03-05" },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 11, role: "Editor", status: "Active", email: "arya.stark@example.com", joined: "2023-04-10" },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null, role: "Admin", status: "Active", email: "dany.t@example.com", joined: "2023-05-22" },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150, role: "Viewer", status: "Banned", email: "mel@example.com", joined: "2023-06-01" },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44, role: "Editor", status: "Active", email: "ferrara.c@example.com", joined: "2023-07-18" },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36, role: "Viewer", status: "Inactive", email: "rossini.f@example.com", joined: "2023-08-30" },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65, role: "Admin", status: "Active", email: "harvey.r@example.com", joined: "2023-09-12" },
-];
-
-const statusConfig = {
-  Active: { color: "success", icon: <VerifiedUserIcon sx={{ fontSize: 14 }} /> },
-  Inactive: { color: "default", icon: null },
-  Banned: { color: "error", icon: <BlockIcon sx={{ fontSize: 14 }} /> },
+const blankForm = {
+  firstName: '', lastName: '', age: '', gender: '',
+  contactNumber: '', email: '', role: 'editor',
+  username: '', password: '', address: '', isActive: true,
 };
 
-const roleConfig = {
-  Admin: "primary",
-  Editor: "warning",
-  Viewer: "default",
+const labelize = (value) =>
+  value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : '';
+
+const loadUsers = () => {
+  try {
+    return {
+      users: JSON.parse(usersSeed).map((user, index) => ({
+        id: Number(user.id) || index + 1,
+        firstName: String(user.firstName ?? '').trim(),
+        lastName: String(user.lastName ?? '').trim(),
+        age: String(user.age ?? '').trim(),
+        gender: genders.includes(String(user.gender ?? '').trim().toLowerCase())
+          ? String(user.gender ?? '').trim().toLowerCase()
+          : '',
+        contactNumber: String(user.contactNumber ?? '').trim(),
+        email: String(user.email ?? '').trim().toLowerCase(),
+        role: roles.includes(String(user.role ?? '').trim().toLowerCase())
+          ? String(user.role ?? '').trim().toLowerCase()
+          : 'editor',
+        username: String(user.username ?? '').trim().toLowerCase(),
+        password: String(user.password ?? '').trim(),
+        address: String(user.address ?? '').trim(),
+        isActive: typeof user.isActive === 'boolean' ? user.isActive : true,
+      })),
+      error: '',
+    };
+  } catch (e) {
+    return { users: [], error: 'Unable to read users from src/assets/users.json.' };
+  }
 };
 
-const summaryStats = [
-  { label: "Total Users", value: rows.length, icon: <PeopleIcon />, color: "#1976d2", bg: "#e3f2fd" },
-  { label: "Active", value: rows.filter((r) => r.status === "Active").length, icon: <VerifiedUserIcon />, color: "#388e3c", bg: "#e8f5e9" },
-  { label: "Inactive", value: rows.filter((r) => r.status === "Inactive").length, icon: <PeopleIcon />, color: "#f57c00", bg: "#fff3e0" },
-  { label: "Banned", value: rows.filter((r) => r.status === "Banned").length, icon: <BlockIcon />, color: "#d32f2f", bg: "#ffebee" },
-];
+const seed = loadUsers();
 
-function getInitials(row) {
-  const first = row.firstName?.[0] ?? "";
-  const last = row.lastName?.[0] ?? "";
-  return (first + last).toUpperCase();
-}
-
-function UsersPage() {
-  const [search, setSearch] = useState("");
-  const [selectionModel, setSelectionModel] = useState([]);
+const UsersPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // Robust pagination state for all MUI X versions
-  const [pageSize, setPageSize] = useState(5);
-  const [page, setPage] = useState(0);
+  // States
+  const [users, setUsers] = useState(seed.users);
+  const [modal, setModal] = useState({ open: false, id: null });
+  const [form, setForm] = useState(blankForm);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
-  const filteredRows = rows.filter((row) => {
-    const fullName = `${row.firstName ?? ""} ${row.lastName ?? ""}`.toLowerCase();
-    const email = row.email.toLowerCase();
-    const q = search.toLowerCase();
-    return fullName.includes(q) || email.includes(q) || row.role.toLowerCase().includes(q);
+  // Enhancement 2: Search and Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({ role: 'all', gender: 'all', status: 'all' });
+
+  // Enhancement 1: Print PDF Logic (Based on Lab 5 ReportsPage)
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    const exportedAt = new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'long', timeStyle: 'short',
+    }).format(new Date());
+
+    const tableContent = filteredUsers.map(user => `
+      <tr>
+        <td>${user.firstName} ${user.lastName}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${labelize(user.role)}</td>
+        <td>${user.isActive ? 'Active' : 'Inactive'}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>User Directory Report</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; color: #1f2937; }
+            .header { border-bottom: 2px solid #d1d5db; margin-bottom: 20px; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+            th { background-color: #f9fafb; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>User Directory Report</h1>
+            <p>Generated on: ${exportedAt}</p>
+            <p>Total Records: ${filteredUsers.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Full Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${tableContent}</tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  // Enhancement 2: Search/Filter Logic
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      const searchStr = `${u.firstName} ${u.lastName} ${u.email} ${u.username}`.toLowerCase();
+      const matchesSearch = searchStr.includes(searchQuery.toLowerCase());
+      const matchesRole = filters.role === 'all' || u.role === filters.role;
+      const matchesGender = filters.gender === 'all' || u.gender === filters.gender;
+      const matchesStatus = filters.status === 'all' || 
+        (filters.status === 'active' ? u.isActive : !u.isActive);
+
+      return matchesSearch && matchesRole && matchesGender && matchesStatus;
+    });
+  }, [users, searchQuery, filters]);
+
+  // Enhancement 3: Beginner-Friendly Validation Rules
+  const validate = () => {
+    const nextErrors = {};
+    
+    // Basic Required Check
+    ['firstName', 'lastName', 'gender', 'role', 'email', 'address'].forEach(key => {
+      if (!String(form[key]).trim()) nextErrors[key] = 'This field is required.';
+    });
+
+    // Age: Number only
+    if (!/^\d+$/.test(form.age)) {
+      nextErrors.age = 'Age must be a number only.';
+    }
+
+    // Contact Number: 11 digits
+    if (!/^\d{11}$/.test(form.contactNumber)) {
+      nextErrors.contactNumber = 'Contact number must be exactly 11 digits.';
+    }
+
+    // Username: No spaces
+    if (/\s/.test(form.username)) {
+      nextErrors.username = 'Username must not contain spaces.';
+    } else if (!form.username) {
+      nextErrors.username = 'Username is required.';
+    }
+
+    // Password: Min 8 characters
+    if (form.password.length < 8) {
+      nextErrors.password = 'Password must be at least 8 characters.';
+    }
+
+    // Email format
+    if (!nextErrors.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      nextErrors.email = 'Enter a valid email address.';
+    }
+
+    return nextErrors;
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length) return setErrors(nextErrors);
+
+    setUsers((prev) => {
+      if (modal.id) return prev.map((u) => (u.id === modal.id ? { ...form, id: modal.id } : u));
+      return [...prev, { ...form, id: Date.now() }];
+    });
+    closeModal();
+  };
+
+  const toggleStatus = (id) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u)));
+  };
+
+  const closeModal = () => { setModal({ open: false, id: null }); setShowPassword(false); setErrors({}); };
+
+  const fieldProps = (name, label, extra = {}) => ({
+    name, label, value: form[name], fullWidth: true,
+    error: Boolean(errors[name]), helperText: errors[name],
+    onChange: (e) => {
+      const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      setForm(p => ({ ...p, [name]: val }));
+      if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+    },
+    ...extra
   });
 
-  const columns = [
-    {
-      field: "fullName",
-      headerName: "User",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1.5} sx={{ py: 0.5, alignItems: "center" }}>
-          <Avatar
-            sx={{
-              bgcolor: avatarColors[params.row.id % avatarColors.length],
-              width: 36,
-              height: 36,
-              fontSize: "0.8rem",
-              fontWeight: 700,
-            }}
-          >
-            {getInitials(params.row)}
-          </Avatar>
-          <Box>
-            <Typography variant="body2" fontWeight={600} lineHeight={1.2}>
-              {params.row.firstName ?? "—"} {params.row.lastName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">{params.row.email}</Typography>
-          </Box>
-        </Stack>
-      ),
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      width: 110,
-      renderCell: (params) => (
-        <Chip label={params.value} size="small" color={roleConfig[params.value] ?? "default"} variant="outlined" />
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 120,
-      renderCell: (params) => {
-        const cfg = statusConfig[params.value] ?? {};
-        return (
-          <Chip
-            label={params.value}
-            size="small"
-            color={cfg.color}
-            icon={cfg.icon ?? undefined}
-            variant="filled"
-          />
-        );
-      },
-    },
-    { field: "age", headerName: "Age", width: 80, type: "number", align: "center", headerAlign: "center" },
-    { field: "joined", headerName: "Joined", width: 130 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 130,
-      sortable: false,
-      renderCell: () => (
-        <Stack direction="row" spacing={0.5}>
-          <Tooltip title="View"><IconButton size="small"><VisibilityIcon fontSize="small" /></IconButton></Tooltip>
-          <Tooltip title="Edit"><IconButton size="small" color="primary"><EditIcon fontSize="small" /></IconButton></Tooltip>
-          <Tooltip title="Delete"><IconButton size="small" color="error"><DeleteIcon fontSize="small" /></IconButton></Tooltip>
-        </Stack>
-      ),
-    },
-  ];
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
-        Users Management
-      </Typography>
-      <Typography variant="body2" color="text.secondary" mb={3}>
-        View, manage, and monitor all registered users on the platform.
-      </Typography>
-
-      {/* Summary Stats */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={4} sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}>
-        {summaryStats.map((stat) => (
-          <Card key={stat.label} elevation={2} sx={{ borderRadius: 3, flex: 1 }}>
-            <CardContent sx={{ py: 2 }}>
-              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Avatar sx={{ bgcolor: stat.bg, color: stat.color, width: 44, height: 44 }}>
-                  {stat.icon}
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">{stat.label}</Typography>
-                  <Typography variant="h5" fontWeight={700}>{stat.value}</Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
+    <Box sx={{ width: '100%' }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3} spacing={2}>
+        <Typography variant="h4">Users</Typography>
+        <Stack direction="row" spacing={1.5}>
+          <Button variant="outlined" startIcon={<PdfIcon />} onClick={handlePrint}>Export PDF</Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setForm(blankForm); setModal({ open: true, id: null }); }}>
+            Add User
+          </Button>
+        </Stack>
       </Stack>
 
-      {/* Table Card */}
-      <Card elevation={2} sx={{ borderRadius: 3 }}>
-        <CardContent>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2} sx={{ justifyContent: "space-between", alignItems: { xs: "stretch", sm: "center" } }}>
-            <Typography variant="h6" fontWeight={600}>User List</Typography>
-            <Stack direction="row" spacing={1.5}>
-              {/* Use slotProps for better compatibility in newer MUI versions */}
-              <TextField
-                size="small"
-                placeholder="Search users…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ width: 220 }}
-              />
-              <Button variant="contained" startIcon={<PersonAddIcon />} size="small">
-                Add User
-              </Button>
-            </Stack>
-          </Stack>
+      {/* Enhancement 2: Search & Filter Bar */}
+      <Paper sx={{ p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: alpha(theme.palette.common.black, 0.04), px: 2, py: 0.5, borderRadius: 1, flex: 1, minWidth: 250 }}>
+          <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+          <InputBase placeholder="Search users..." fullWidth value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        </Box>
+        
+        <TextField select size="small" label="Role" value={filters.role} onChange={(e) => setFilters(p => ({...p, role: e.target.value}))} sx={{ minWidth: 120 }}>
+          <MenuItem value="all">All Roles</MenuItem>
+          {roles.map(r => <MenuItem key={r} value={r}>{labelize(r)}</MenuItem>)}
+        </TextField>
 
-          {selectionModel.length > 0 && (
-            <>
-              <Stack direction="row" spacing={1} mb={1}>
-                <Chip label={`${selectionModel.length} selected`} size="small" color="primary" />
-                <Button size="small" color="error" variant="outlined" startIcon={<DeleteIcon />}>
-                  Delete Selected
-                </Button>
+        <TextField select size="small" label="Status" value={filters.status} onChange={(e) => setFilters(p => ({...p, status: e.target.value}))} sx={{ minWidth: 120 }}>
+          <MenuItem value="all">All Status</MenuItem>
+          <MenuItem value="active">Active</MenuItem>
+          <MenuItem value="inactive">Inactive</MenuItem>
+        </TextField>
+      </Paper>
+
+      <Paper sx={{ p: 2 }}>
+        <Box sx={{ height: 500, width: '100%' }}>
+          <DataGrid 
+            rows={filteredUsers} 
+            columns={[
+              { field: 'id', headerName: 'ID', width: 70 },
+              { field: 'fullName', headerName: 'Name', flex: 1, valueGetter: (_, row) => `${row.firstName} ${row.lastName}` },
+              { field: 'username', headerName: 'Username', width: 130 },
+              { field: 'email', headerName: 'Email', flex: 1 },
+              { field: 'role', headerName: 'Role', width: 110, renderCell: (p) => labelize(p.value) },
+              { field: 'status', headerName: 'Status', width: 120, renderCell: ({row}) => (
+                <Chip size="small" label={row.isActive ? 'Active' : 'Inactive'} color={row.isActive ? 'success' : 'default'} />
+              )},
+              { field: 'actions', headerName: 'Actions', width: 200, sortable: false, renderCell: ({row}) => (
+                <Stack direction="row" spacing={1}>
+                  <Button size="small" onClick={() => setModal({ open: true, id: row.id }) || setForm(row)}>Edit</Button>
+                  <Button size="small" color={row.isActive ? 'warning' : 'success'} onClick={() => toggleStatus(row.id)}>
+                    {row.isActive ? 'Disable' : 'Enable'}
+                  </Button>
+                </Stack>
+              )}
+            ]}
+          />
+        </Box>
+      </Paper>
+
+      {/* Dialog with Strict Validation Fields */}
+      <Dialog open={modal.open} onClose={closeModal} fullWidth maxWidth="md">
+        <Box component="form" onSubmit={handleSubmit}>
+          <DialogTitle>{modal.id ? 'Edit User' : 'Add User'}</DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              <Stack direction="row" spacing={2}><TextField {...fieldProps('firstName', 'First Name')} /><TextField {...fieldProps('lastName', 'Last Name')} /></Stack>
+              <Stack direction="row" spacing={2}>
+                <TextField {...fieldProps('age', 'Age')} />
+                <TextField {...fieldProps('gender', 'Gender', { select: true })}>
+                  {genders.map(g => <MenuItem key={g} value={g}>{labelize(g)}</MenuItem>)}
+                </TextField>
               </Stack>
-              <Divider sx={{ mb: 1 }} />
-            </>
-          )}
-
-          <Box sx={{ width: "100%" }}>
-            <DataGrid
-              rows={filteredRows}
-              columns={columns}
-              autoHeight
-              checkboxSelection
-              disableRowSelectionOnClick
-              
-              // Version-agnostic pagination approach
-              page={page}
-              onPageChange={(newPage) => setPage(newPage)}
-              pageSize={pageSize}
-              onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-              
-              // Keep newer prop for compatibility if supported
-              paginationModel={{ pageSize, page }}
-              onPaginationModelChange={(model) => {
-                setPage(model.page);
-                setPageSize(model.pageSize);
-              }}
-              
-              pageSizeOptions={[5, 10]}
-              rowHeight={60}
-              sx={{
-                border: "none",
-                "& .MuiDataGrid-columnHeaders": { backgroundColor: "#f5f5f5", fontWeight: 700 },
-                "& .MuiDataGrid-row:hover": { backgroundColor: "#f0f7ff" },
-              }}
-            />
-          </Box>
-        </CardContent>
-      </Card>
+              <Stack direction="row" spacing={2}><TextField {...fieldProps('contactNumber', 'Contact (11 Digits)')} /><TextField {...fieldProps('email', 'Email')} /></Stack>
+              <Stack direction="row" spacing={2}>
+                <TextField {...fieldProps('role', 'Role', { select: true })}>
+                  {roles.map(r => <MenuItem key={r} value={r}>{labelize(r)}</MenuItem>)}
+                </TextField>
+                <TextField {...fieldProps('username', 'Username (No Spaces)')} />
+              </Stack>
+              <TextField {...fieldProps('password', 'Password (Min 8 Chars)', { 
+                type: showPassword ? 'text' : 'password',
+                InputProps: { endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton>
+                  </InputAdornment>
+                )}
+              })} />
+              <TextField {...fieldProps('address', 'Address', { multiline: true, rows: 2 })} />
+              <FormControlLabel control={<Switch checked={form.isActive} onChange={(e) => setForm(p => ({...p, isActive: e.target.checked}))} />} label="Active Status" />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={closeModal}>Cancel</Button>
+            <Button type="submit" variant="contained">Save Changes</Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Box>
   );
-}
+};
 
 export default UsersPage;
