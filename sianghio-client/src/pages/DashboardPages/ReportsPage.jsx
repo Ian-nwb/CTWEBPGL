@@ -107,97 +107,100 @@ const systemHealth = [
 export default function ReportsPage() {
   const [chartMode, setChartMode] = useState("bar");
 
-  const handleExportPDF = () => {
-    const printWindow = window.open("", "_blank", "width=1200,height=900");
-    const timestamp = new Intl.DateTimeFormat("en-PH", {
-      dateStyle: "long",
-      timeStyle: "short",
-    }).format(new Date());
+const handleExportPDF = () => {
+  const timestamp = new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date());
 
-    const kpiHtml = kpis.map((k) => `
-      <div class="kpi-card">
-        <div class="kpi-label">${k.label}</div>
-        <div class="kpi-value">${k.value}</div>
-        <div class="kpi-delta ${k.positive ? "pos" : "neg"}">${k.delta} vs last month</div>
-      </div>
-    `).join("");
+  const kpiHtml = kpis.map((k) => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-delta ${k.positive ? "pos" : "neg"}">${k.delta} vs last month</div>
+    </div>
+  `).join("");
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>System Performance Report</title>
-          <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
-            .header { border-bottom: 2px solid #1976d2; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
-            h1 { color: #1976d2; margin: 0; font-size: 28px; }
-            .meta { color: #666; font-size: 14px; }
-            .kpi-container { display: flex; gap: 15px; margin-bottom: 30px; }
-            .kpi-card { flex: 1; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa; }
-            .kpi-label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; }
-            .kpi-value { font-size: 24px; font-weight: bold; margin: 5px 0; }
-            .kpi-delta { font-size: 12px; font-weight: bold; }
-            .pos { color: #2e7d32; }
-            .neg { color: #d32f2f; }
-            .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px; border-left: 4px solid #1976d2; padding-left: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { background: #f5f5f5; text-align: left; padding: 12px; font-size: 13px; border-bottom: 2px solid #ddd; }
-            td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-            .health-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
-            @media print { body { padding: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div>
-              <h1>System Performance Report</h1>
-              <div class="meta">Analytics Summary Report</div>
-            </div>
-            <div class="meta" style="text-align:right;">
-              Generated: ${timestamp}<br/>Status: <span class="pos">Active</span>
-            </div>
+  const printWindow = window.open("", "_blank", "width=1200,height=900");
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>System Performance Report</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
+          .print-btn { display: block; margin: 0 auto 30px; padding: 12px 36px; background: #1976d2; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+          .print-btn:hover { background: #1565c0; }
+          .header { border-bottom: 2px solid #1976d2; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+          h1 { color: #1976d2; margin: 0; font-size: 28px; }
+          .meta { color: #666; font-size: 14px; }
+          .kpi-container { display: flex; gap: 15px; margin-bottom: 30px; }
+          .kpi-card { flex: 1; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa; }
+          .kpi-label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; }
+          .kpi-value { font-size: 24px; font-weight: bold; margin: 5px 0; }
+          .kpi-delta { font-size: 12px; font-weight: bold; }
+          .pos { color: #2e7d32; }
+          .neg { color: #d32f2f; }
+          .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px; border-left: 4px solid #1976d2; padding-left: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { background: #f5f5f5; text-align: left; padding: 12px; font-size: 13px; border-bottom: 2px solid #ddd; }
+          td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+          .health-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
+          @media print { .print-btn { display: none; } body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <button class="print-btn" onclick="window.print()">🖨️ Save as PDF / Print</button>
+        <div class="header">
+          <div>
+            <h1>System Performance Report</h1>
+            <div class="meta">Analytics Summary Report</div>
           </div>
-          <div class="kpi-container">${kpiHtml}</div>
-          <div class="section-title">Traffic & Engagement Overview</div>
-          <table>
-            <thead>
+          <div class="meta" style="text-align:right;">
+            Generated: ${timestamp}<br/>Status: <span class="pos">Active</span>
+          </div>
+        </div>
+        <div class="kpi-container">${kpiHtml}</div>
+        <div class="section-title">Traffic &amp; Engagement Overview</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Traffic Source</th><th>Share Percentage</th>
+              <th>Top Visited Pages</th><th>Monthly Views</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pieData.map((p, i) => `
               <tr>
-                <th>Traffic Source</th><th>Share Percentage</th>
-                <th>Top Visited Pages</th><th>Monthly Views</th>
+                <td>${p.label}</td>
+                <td><strong>${p.value}%</strong></td>
+                <td>${topPages[i]?.page || "-"}</td>
+                <td>${topPages[i]?.views.toLocaleString() || "-"}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${pieData.map((p, i) => `
-                <tr>
-                  <td>${p.label}</td>
-                  <td><strong>${p.value}%</strong></td>
-                  <td>${topPages[i]?.page || "-"}</td>
-                  <td>${topPages[i]?.views.toLocaleString() || "-"}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-          <div style="display:flex;gap:40px;margin-top:30px;">
-            <div style="flex:1;">
-              <div class="section-title">System Infrastructure Health</div>
-              <div class="health-row"><span>CPU Utilization</span><strong>72%</strong></div>
-              <div class="health-row"><span>Memory Usage</span><strong>55%</strong></div>
-              <div class="health-row"><span>Disk Space</span><strong>38%</strong></div>
-            </div>
-            <div style="flex:1;background:#e3f2fd;padding:20px;border-radius:8px;">
-              <div style="font-weight:bold;color:#1976d2;">Executive Summary</div>
-              <p style="font-size:13px;line-height:1.6;">
-                The platform is seeing a <strong>14% growth in revenue</strong> this quarter.
-                Traffic is largely driven by <strong>Direct (${pieData[0].value}%)</strong> and
-                <strong>Organic (${pieData[1].value}%)</strong> channels.
-              </p>
-            </div>
+            `).join("")}
+          </tbody>
+        </table>
+        <div style="display:flex;gap:40px;margin-top:30px;">
+          <div style="flex:1;">
+            <div class="section-title">System Infrastructure Health</div>
+            <div class="health-row"><span>CPU Utilization</span><strong>72%</strong></div>
+            <div class="health-row"><span>Memory Usage</span><strong>55%</strong></div>
+            <div class="health-row"><span>Disk Space</span><strong>38%</strong></div>
           </div>
-          <script>window.onload = function() { window.print(); window.close(); }<\/script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
+          <div style="flex:1;background:#e3f2fd;padding:20px;border-radius:8px;">
+            <div style="font-weight:bold;color:#1976d2;">Executive Summary</div>
+            <p style="font-size:13px;line-height:1.6;">
+              The platform is seeing a <strong>14% growth in revenue</strong> this quarter.
+              Traffic is largely driven by <strong>Direct (${pieData[0].value}%)</strong> and
+              <strong>Organic (${pieData[1].value}%)</strong> channels.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+};
 
   return (
     <Box sx={{ p: 3, bgcolor: "grey.50", minHeight: "100vh" }}>
