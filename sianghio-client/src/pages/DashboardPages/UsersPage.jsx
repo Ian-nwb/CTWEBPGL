@@ -58,18 +58,18 @@ const UsersPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  // States
+  
   const [users, setUsers] = useState(seed.users);
   const [modal, setModal] = useState({ open: false, id: null });
   const [form, setForm] = useState(blankForm);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
-  // Enhancement 2: Search and Filter States
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ role: 'all', gender: 'all', status: 'all' });
 
-  // Enhancement 1: Print PDF Logic (Based on Lab 5 ReportsPage)
+  
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'width=1200,height=900');
     const exportedAt = new Intl.DateTimeFormat('en-US', {
@@ -119,7 +119,7 @@ const UsersPage = () => {
     printWindow.print();
   };
 
-  // Enhancement 2: Search/Filter Logic
+  
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
       const searchStr = `${u.firstName} ${u.lastName} ${u.email} ${u.username}`.toLowerCase();
@@ -133,38 +133,38 @@ const UsersPage = () => {
     });
   }, [users, searchQuery, filters]);
 
-  // Enhancement 3: Beginner-Friendly Validation Rules
+  
   const validate = () => {
     const nextErrors = {};
     
-    // Basic Required Check
+    
     ['firstName', 'lastName', 'gender', 'role', 'email', 'address'].forEach(key => {
       if (!String(form[key]).trim()) nextErrors[key] = 'This field is required.';
     });
 
-    // Age: Number only
+    
     if (!/^\d+$/.test(form.age)) {
       nextErrors.age = 'Age must be a number only.';
     }
 
-    // Contact Number: 11 digits
+    
     if (!/^\d{11}$/.test(form.contactNumber)) {
       nextErrors.contactNumber = 'Contact number must be exactly 11 digits.';
     }
 
-    // Username: No spaces
+    
     if (/\s/.test(form.username)) {
       nextErrors.username = 'Username must not contain spaces.';
     } else if (!form.username) {
       nextErrors.username = 'Username is required.';
     }
 
-    // Password: Min 8 characters
+    
     if (form.password.length < 8) {
       nextErrors.password = 'Password must be at least 8 characters.';
     }
 
-    // Email format
+    
     if (!nextErrors.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       nextErrors.email = 'Enter a valid email address.';
     }

@@ -28,7 +28,7 @@ import StorageIcon from "@mui/icons-material/Storage";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
-// ── Data ─────────────────────────────────────────────────────────────────────
+
 const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const revenueData  = [41000,38000,55000,49000,63000,58000,72000,80000,68000,85000,91000,104000];
 const expensesData = [28000,22000,41000,33000,52000,44000,50000,59000,47000,61000,63000,74000];
@@ -103,7 +103,7 @@ const systemHealth = [
   { label: "Disk Usage",   value: 38, icon: <StorageIcon />,iconBg: "#fff3e0", iconColor: "#f57c00", chipColor: "warning" },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function ReportsPage() {
   const [chartMode, setChartMode] = useState("bar");
 
