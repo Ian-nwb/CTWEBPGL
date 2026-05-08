@@ -1,0 +1,12 @@
+sianghio-webprog/.gitignore
+
+ 
+
+sianghio-server/.env
+
+sianghio-server/node_modules
+
+sianghio-client/.env
+
+sianghio-client/node_modules
+
