@@ -60,8 +60,11 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find the user by email
-    const user = await User.findOne({ email });
+    // Use a case-insensitive regex to find the user
+    const user = await User.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, 'i') } 
+    });
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -89,5 +92,83 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// @desc    Register a new user (Public)
+// userController.js
 
-module.exports = { getUsers, createUser, updateUser, deleteUser, loginUser };
+const registerUser = async (req, res) => {
+  try {
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      password, 
+      age, 
+      gender, 
+      contactNumber, 
+      username, 
+      address 
+    } = req.body;
+
+    // 1. Basic Validation (Backend side)
+    if (!firstName || !email || !password || !username) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // 2. Check if user/email already exists
+    const userExists = await User.findOne({ 
+      $or: [
+        { email: { $regex: new RegExp(`^${email}$`, 'i') } },
+        { username: { $regex: new RegExp(`^${username}$`, 'i') } }
+      ]
+    });
+
+    if (userExists) {
+      return res.status(400).json({ message: 'User or Email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Create the user with all required fields
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      age,
+      gender,
+      contactNumber,
+      username,
+      address,
+      type: 'viewer', // Force default role
+      isActive: true
+    });
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, type: user.type },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(201).json({
+      message: 'Registration successful',
+      token,
+      type: user.type,
+      firstName: user.firstName
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add registerUser to your exports
+module.exports = { 
+  getUsers, 
+  createUser, 
+  updateUser, 
+  deleteUser, 
+  loginUser, 
+  registerUser // Added this
+};
+
+module.exports = { getUsers, createUser, updateUser, deleteUser, loginUser, registerUser };

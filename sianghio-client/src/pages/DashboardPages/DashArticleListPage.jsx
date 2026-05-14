@@ -7,10 +7,10 @@ import {
   TextField,
   Stack,
   IconButton,
-  Switch,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchArticles, createArticle, updateArticle, deleteArticle } from "../../services/articleService";
 
 const modalStyle = {
@@ -18,11 +18,13 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 600,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
   p: 4,
+  maxHeight: '90vh',
+  overflowY: 'auto'
 };
 
 const DashArticleListPage = () => {
@@ -31,19 +33,20 @@ const DashArticleListPage = () => {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editArticleId, setEditArticleId] = useState(null);
+  
   const [newArticle, setNewArticle] = useState({
-    slug: "",
+    name: "",
     title: "",
-    paragraphs: 0,
-    preview: "",
-    status: "Active",
+    imageUrl: "",
+    content: "",
   });
 
   const loadArticles = async () => {
     setLoading(true);
     try {
-      const { data } = await fetchArticles();
-      setArticles(data.articles);
+      const response = await fetchArticles();
+      const fetchedData = response.data?.data || [];
+      setArticles(fetchedData);
     } catch (error) {
       console.error("Error fetching articles:", error);
     } finally {
@@ -56,13 +59,7 @@ const DashArticleListPage = () => {
   }, []);
 
   const handleOpen = () => {
-    setNewArticle({
-      slug: "",
-      title: "",
-      paragraphs: 0,
-      preview: "",
-      status: "Active",
-    });
+    setNewArticle({ name: "", title: "", imageUrl: "", content: "" });
     setIsEditing(false);
     setOpen(true);
   };
@@ -74,70 +71,82 @@ const DashArticleListPage = () => {
   };
 
   const handleEdit = (article) => {
-    setNewArticle(article);
+    const contentString = Array.isArray(article.content) 
+      ? article.content.join('\n\n') 
+      : article.content;
+
+    setNewArticle({ 
+      name: article.name, 
+      title: article.title, 
+      imageUrl: article.imageUrl, 
+      content: contentString 
+    });
     setEditArticleId(article._id);
     setIsEditing(true);
     setOpen(true);
   };
 
-  const handleSaveArticle = async () => {
-    try {
-      if (isEditing) {
-        await updateArticle(editArticleId, newArticle);
-      } else {
-        await createArticle(newArticle);
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this article?")) {
+      try {
+        await deleteArticle(id);
+        loadArticles();
+      } catch (error) {
+        console.error("Error deleting article:", error);
       }
-      loadArticles();
-      handleClose();
-    } catch (error) {
-      console.error("Error saving article:", error);
     }
   };
 
-  const handleToggleStatus = async (id, currentStatus) => {
+  const handleSaveArticle = async () => {
     try {
-      const newStatus = currentStatus === "Active" ? "Disabled" : "Active";
-      await updateArticle(id, { status: newStatus });
-      loadArticles();
+      // Backend expects specific keys: name, title, imageUrl, content
+      const payload = {
+        name: newArticle.name,
+        title: newArticle.title,
+        imageUrl: newArticle.imageUrl,
+        content: newArticle.content
+      };
+
+      if (isEditing) {
+        await updateArticle(editArticleId, payload);
+      } else {
+        await createArticle(payload);
+      }
+      await loadArticles();
+      handleClose();
     } catch (error) {
-      console.error("Error toggling article status:", error);
+      console.error("Error saving article:", error);
+      const errorMsg = error.response?.data?.message || "Check if Slug is unique and all fields are filled.";
+      alert("Failed to save article: " + errorMsg);
     }
   };
 
   const columns = [
-    { field: "_id", headerName: "ID", flex: 1 },
-    { field: "slug", headerName: "Slug", flex: 1 },
-    { field: "title", headerName: "Title", flex: 1 },
-    { field: "paragraphs", headerName: "Paragraphs", flex: 0.5 },
-    { field: "preview", headerName: "Preview", flex: 2 },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          color={params.value === "Active" ? "success" : "error"}
-          size="small"
-        >
-          {params.value}
-        </Button>
-      ),
+    { field: "title", headerName: "Title", flex: 1.5 },
+    { field: "name", headerName: "Slug", flex: 1 },
+    { 
+      field: "content", 
+      headerName: "Paragraphs", 
+      flex: 0.5, 
+      valueGetter: (value, row) => (row?.content ? row.content.length : 0)
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
+      sortable: false,
       renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <IconButton onClick={() => handleEdit(params.row)}>
+        <Stack 
+            direction="row" 
+            spacing={1} 
+            sx={{ height: '100%', alignItems: "center" }}
+        >
+          <IconButton onClick={() => handleEdit(params.row)} color="primary" size="small">
             <EditIcon />
           </IconButton>
-          <Switch
-            checked={params.row.status === "Active"}
-            onChange={() => handleToggleStatus(params.row._id, params.row.status)}
-            color="primary"
-          />
+          <IconButton onClick={() => handleDelete(params.row._id)} color="error" size="small">
+            <DeleteIcon />
+          </IconButton>
         </Stack>
       ),
     },
@@ -145,60 +154,78 @@ const DashArticleListPage = () => {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4">Articles</Typography>
+      {/* Prop Warning Fix: Use sx for alignment */}
+      <Stack 
+        direction="row" 
+        sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}
+      >
+        <Typography variant="h4" fontWeight="bold">Manage Articles</Typography>
         <Button variant="contained" color="primary" onClick={handleOpen}>
           Add Article
         </Button>
       </Stack>
 
-      <Box sx={{ height: 400, width: "100%" }}>
+      <Box sx={{ height: 500, width: "100%", bgcolor: 'background.paper', borderRadius: 1, boxShadow: 1 }}>
         <DataGrid
           rows={articles}
           columns={columns}
-          getRowId={(row) => row._id}
+          getRowId={(row) => row._id || `temp-${Math.random()}`}
           loading={loading}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+          pageSizeOptions={[10, 25]}
+          disableRowSelectionOnClick
         />
       </Box>
 
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
-          <Typography variant="h6" mb={2}>
-            {isEditing ? "Edit Article" : "Add Article"}
+          <Typography variant="h6" mb={3} fontWeight="bold">
+            {isEditing ? "Edit Article" : "Create New Article"}
           </Typography>
-          <Stack spacing={2}>
+          
+          <Stack spacing={2.5}>
             <TextField
-              label="Slug"
-              fullWidth
-              value={newArticle.slug}
-              onChange={(e) => setNewArticle({ ...newArticle, slug: e.target.value })}
-            />
-            <TextField
-              label="Title"
+              label="Article Title"
               fullWidth
               value={newArticle.title}
               onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
             />
             <TextField
-              label="Paragraphs"
-              type="number"
+              label="Slug (URL Name)"
+              placeholder="e.g. scaling-startup-systems"
               fullWidth
-              value={newArticle.paragraphs}
-              onChange={(e) => setNewArticle({ ...newArticle, paragraphs: parseInt(e.target.value) })}
+              value={newArticle.name}
+              onChange={(e) => setNewArticle({ ...newArticle, name: e.target.value })}
             />
             <TextField
-              label="Preview"
+              label="Image URL"
+              fullWidth
+              value={newArticle.imageUrl}
+              onChange={(e) => setNewArticle({ ...newArticle, imageUrl: e.target.value })}
+            />
+            <TextField
+              label="Content"
+              helperText="Press Enter to create new paragraphs."
               fullWidth
               multiline
-              rows={4}
-              value={newArticle.preview}
-              onChange={(e) => setNewArticle({ ...newArticle, preview: e.target.value })}
+              rows={8}
+              value={newArticle.content}
+              onChange={(e) => setNewArticle({ ...newArticle, content: e.target.value })}
             />
-            <Button variant="contained" onClick={handleSaveArticle}>
-              {isEditing ? "Save Changes" : "Add Article"}
-            </Button>
+            
+            <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end", pt: 2 }}>
+              <Button onClick={handleClose} color="inherit">Cancel</Button>
+              <Button 
+                variant="contained" 
+                size="large" 
+                onClick={handleSaveArticle}
+                disabled={!newArticle.title || !newArticle.name}
+              >
+                {isEditing ? "Save Changes" : "Publish Article"}
+              </Button>
+            </Stack>
           </Stack>
         </Box>
       </Modal>

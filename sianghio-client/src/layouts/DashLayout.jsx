@@ -10,7 +10,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -27,12 +27,20 @@ import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import ArticleIcon from "@mui/icons-material/Article";
 
 const drawerWidth = 248;
+
+// --- UPDATED NAVIGATION ITEMS WITH ROLES ---
 const dashboardNavItems = [
   {
     label: "Dashboard",
     title: "Dashboard",
     to: "/dashboard",
     icon: DashboardIcon,
+  },
+  {
+    label: "Articles",
+    title: "Articles",
+    to: "/dashboard/articles", 
+    icon: ArticleIcon,
   },
   {
     label: "Reports",
@@ -45,9 +53,11 @@ const dashboardNavItems = [
     title: "Users",
     to: "/dashboard/users",
     icon: PeopleIcon,
+    isAdminOnly: true, // Tag this item for restriction
   },
 ];
 
+// ... (Mixins and Styled Components remain exactly as you have them)
 const openedMixin = (theme) => ({
   width: drawerWidth,
   transition: theme.transitions.create("width", {
@@ -158,26 +168,26 @@ const DashLayout = () => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const pageTitle = getPageTitle(location.pathname);
   const navigate = useNavigate();
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
+  // 1. Get current user from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  const pageTitle = getPageTitle(location.pathname);
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
 
   const handleLogout = () => {
-    navigate("/");
+    // 2. Clear user data and redirect
+    localStorage.removeItem("user");
+    navigate("/auth/signin");
   };
 
   return (
     <>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        {/* App Bar */}
         <AppBar position="fixed" open={open}>
           <Toolbar>
             <IconButton
@@ -185,7 +195,7 @@ const DashLayout = () => {
               aria-label="open drawer"
               onClick={open ? handleDrawerClose : handleDrawerOpen}
               edge="start"
-              sx={{ marginRight: 5, ...open && { display: 'none' } }}
+              sx={{ marginRight: 5, ...(open && { display: "none" }) }}
             >
               {open ? <MenuOpenIcon /> : <MenuIcon />}
             </IconButton>
@@ -197,7 +207,6 @@ const DashLayout = () => {
             >
               {pageTitle}
             </Typography>
-            {/* Search */}
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
@@ -212,7 +221,6 @@ const DashLayout = () => {
             </Button>
           </Toolbar>
         </AppBar>
-        {/* Drawer */}
         <Drawer variant="permanent" open={open}>
           <DrawerHeader>
             <IconButton onClick={handleDrawerClose}>
@@ -224,41 +232,42 @@ const DashLayout = () => {
             </IconButton>
           </DrawerHeader>
           <Divider />
-          {/* Drawer List */}
           <List>
-            {dashboardNavItems.map(({ label, to, icon: Icon }) => (
-              <ListItem key={to} disablePadding sx={{ display: "block" }}>
-                <ListItemButton
-                  component={Link}
-                  to={to}
-                  selected={location.pathname === to}
-                  sx={{
-                    minHeight: 48,
-                    px: 2.5,
-                    justifyContent: open ? "initial" : "center",
-                  }}
-                >
-                  <ListItemIcon
+            {dashboardNavItems
+              // 3. FILTER: If item is isAdminOnly, only show it if user.type is "admin"
+              .filter(item => !item.isAdminOnly || user?.type === "admin")
+              .map(({ label, to, icon: Icon }) => (
+                <ListItem key={to} disablePadding sx={{ display: "block" }}>
+                  <ListItemButton
+                    component={Link}
+                    to={to}
+                    selected={location.pathname === to}
                     sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
+                      minHeight: 48,
+                      px: 2.5,
+                      justifyContent: open ? "initial" : "center",
                     }}
                   >
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={label}
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={label}
+                      sx={{ opacity: open ? 1 : 0 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
           </List>
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
-          {/* Content */}
           <Outlet />
         </Box>
       </Box>

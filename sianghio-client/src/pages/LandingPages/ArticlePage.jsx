@@ -1,11 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import articles from '../../assets/article-content.js';
+import { getArticles } from '../../services/articleService'; // Using the unified service
 import NotFoundPage from '../NotFoundPage.jsx';
 
 const ArticlePage = () => {
     const { name } = useParams();
-    const article = articles.find(article => article.name === name);
+    const [article, setArticle] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchArticleData = async () => {
+            try {
+                const response = await getArticles();
+                // Find the specific article by name (slug) from the live list
+                const foundArticle = response.data.data.find(a => a.name === name);
+                setArticle(foundArticle);
+            } catch (error) {
+                console.error("Error loading article:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchArticleData();
+    }, [name]);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <p className="text-zinc-500 animate-pulse font-bold tracking-widest">LOADING CONTENT...</p>
+            </div>
+        );
+    }
 
     if (!article) return <NotFoundPage />;
 
@@ -20,16 +46,23 @@ const ArticlePage = () => {
                     Back to Articles
                 </Link>
                 <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
-                    5 min read
+                    {/* Optional: Add a length-based read time if desired */}
+                    {Math.ceil(article.content.join('').length / 1000)} min read
                 </span>
             </div>
 
             <div className="mb-12 overflow-hidden rounded-3xl border-2 border-zinc-900 shadow-[12px_12px_0px_0px_rgba(24,24,27,1)]">
-                <img 
-                    src={article.imageUrl} 
-                    alt={article.title} 
-                    className="aspect-video w-full object-cover"
-                />
+                {article.imageUrl ? (
+                    <img 
+                        src={article.imageUrl} 
+                        alt={article.title} 
+                        className="aspect-video w-full object-cover"
+                    />
+                ) : (
+                    <div className="aspect-video w-full bg-zinc-200 flex items-center justify-center text-zinc-400">
+                        No Image Available
+                    </div>
+                )}
             </div>
 
             {/* Article Content */}
@@ -39,7 +72,7 @@ const ArticlePage = () => {
                 </h1>
 
                 <div className="prose prose-zinc max-w-none">
-                    {article.content.map((paragraph, i) => (
+                    {article.content && article.content.map((paragraph, i) => (
                         <p key={i} className="mb-6 text-lg leading-relaxed text-zinc-600">
                             {paragraph}
                         </p>

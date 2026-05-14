@@ -119,12 +119,12 @@ const UsersPage = () => {
   };
 
   const columns = [
-    {
-      field: 'name',
-      headerName: 'Name',
-      flex: 1,
-      valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-    },
+ {
+  field: 'name',
+  headerName: 'Name',
+  flex: 1,
+  valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+},
     { field: 'age', headerName: 'Age', flex: 1, sortable: true },
     { field: 'gender', headerName: 'Gender', flex: 1, sortable: true },
     { field: 'email', headerName: 'Email', flex: 1 },
