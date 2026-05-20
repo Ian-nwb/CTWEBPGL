@@ -1,20 +1,20 @@
 const Article = require('../models/Article');
 
-// @desc    Get all articles
+
 const getArticles = async (req, res) => {
   try {
     const articles = await Article.find().sort({ createdAt: -1 });
     res.status(200).json({ 
       success: true, 
       count: articles.length, 
-      data: articles // Changed from 'users' to 'data' for clarity
+      data: articles 
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Create new article
+
 const createArticle = async (req, res) => {
   try {
     const { title, name, imageUrl, content } = req.body;
@@ -26,7 +26,7 @@ const createArticle = async (req, res) => {
     const article = await Article.create({
       title,
       name,
-      imageUrl: imageUrl || "", // If imageUrl is null/undefined, save as empty string
+      imageUrl: imageUrl || "", 
       content: contentArray
     });
 
@@ -39,7 +39,6 @@ const createArticle = async (req, res) => {
   }
 };
 
-// @desc    Update article
 const updateArticle = async (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -60,7 +59,7 @@ const updateArticle = async (req, res) => {
   }
 };
 
-// @desc    Delete article
+
 const deleteArticle = async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);

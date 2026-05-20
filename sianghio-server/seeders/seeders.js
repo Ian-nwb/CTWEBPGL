@@ -1,5 +1,3 @@
-// seeders.js
-
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -91,10 +89,10 @@ const seedDatabase = async () => {
 
     console.log("MongoDB Connected");
 
-    // remove old users
+
     await User.deleteMany();
 
-    // hash passwords
+
     const hashedUsers = await Promise.all(
       users.map(async (user) => ({
         ...user,
@@ -102,7 +100,7 @@ const seedDatabase = async () => {
       }))
     );
 
-    // insert users
+
     await User.insertMany(hashedUsers);
 
     console.log("Users seeded successfully!");

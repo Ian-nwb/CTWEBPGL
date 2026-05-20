@@ -13,8 +13,8 @@ const ArticleSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      required: false, // Change this to false
-      default: ""      // Optional: set a default empty string
+      required: false, 
+      default: ""      
     },
     content: {
       type: [String],

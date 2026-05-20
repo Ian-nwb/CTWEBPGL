@@ -1,10 +1,10 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs'); // For password hashing
-const jwt = require('jsonwebtoken'); // For generating tokens
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken'); 
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({}, '-password'); // Exclude the password field
+    const users = await User.find({}, '-password'); 
     res.json({ users });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -13,15 +13,15 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    // Ensure the password is included in the request body
+    
     if (!req.body.password) {
       return res.status(400).json({ message: 'Password is required' });
     }
 
-    // Hash the password
+    
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    // Create the user with the hashed password
+    
     const user = await User.create({ ...req.body, password: hashedPassword });
 
     res.status(201).json(user);
@@ -32,13 +32,13 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    // Check if the password is being updated
+    
     if (req.body.password) {
-      // Hash the new password
+      
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
 
-    // Update the user with the new data
+    
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
     res.json(user);
@@ -60,7 +60,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Use a case-insensitive regex to find the user
+    
     const user = await User.findOne({ 
       email: { $regex: new RegExp(`^${email}$`, 'i') } 
     });
@@ -69,31 +69,31 @@ const loginUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if the user is active
+    
     if (!user.isActive) {
       return res.status(403).json({ message: 'Your account is inactive. Please contact support.' });
     }
 
-    // Compare the provided password with the hashed password
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Generate a JWT token
+    
     const token = jwt.sign(
-      { id: user._id, email: user.email, type: user.type }, // Include type in the token
+      { id: user._id, email: user.email, type: user.type }, 
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ message: 'Login successful', token, type: user.type, firstName: user.firstName }); // Include type in the response
+    res.json({ message: 'Login successful', token, type: user.type, firstName: user.firstName }); 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-// @desc    Register a new user (Public)
-// userController.js
+
+
 
 const registerUser = async (req, res) => {
   try {
@@ -109,12 +109,12 @@ const registerUser = async (req, res) => {
       address 
     } = req.body;
 
-    // 1. Basic Validation (Backend side)
+    
     if (!firstName || !email || !password || !username) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // 2. Check if user/email already exists
+    
     const userExists = await User.findOne({ 
       $or: [
         { email: { $regex: new RegExp(`^${email}$`, 'i') } },
@@ -128,7 +128,7 @@ const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Create the user with all required fields
+    
     const user = await User.create({
       firstName,
       lastName,
@@ -139,7 +139,7 @@ const registerUser = async (req, res) => {
       contactNumber,
       username,
       address,
-      type: 'viewer', // Force default role
+      type: 'viewer', 
       isActive: true
     });
 
@@ -161,14 +161,14 @@ const registerUser = async (req, res) => {
   }
 };
 
-// Add registerUser to your exports
+
 module.exports = { 
   getUsers, 
   createUser, 
   updateUser, 
   deleteUser, 
   loginUser, 
-  registerUser // Added this
+  registerUser 
 };
 
 module.exports = { getUsers, createUser, updateUser, deleteUser, loginUser, registerUser };
