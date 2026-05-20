@@ -34,7 +34,7 @@ const handleLogin = async (e) => {
 
     navigate('/dashboard', { state: userData });
   } catch (err) {
-    const message = err.response?.data?.message || 'Invalid credentials.';
+    const message = err.response?.data?.message || 'An error occurred during login. Please try again.';
     setError(message);
   } finally {
     setIsLoading(false);
