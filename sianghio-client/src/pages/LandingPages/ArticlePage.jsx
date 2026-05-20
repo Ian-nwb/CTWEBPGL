@@ -12,7 +12,6 @@ const ArticlePage = () => {
         const fetchArticleData = async () => {
             try {
                 const response = await getArticles();
-                // Find the specific article by name (slug) from the live list
                 const foundArticle = response.data.data.find(a => a.name === name);
                 setArticle(foundArticle);
             } catch (error) {

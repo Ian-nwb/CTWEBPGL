@@ -26,7 +26,7 @@ const createArticle = async (req, res) => {
     const article = await Article.create({
       title,
       name,
-      imageUrl: imageUrl || "", 
+      imageUrl: imageUrl || "", // If imageUrl is null/undefined, save as empty string
       content: contentArray
     });
 
@@ -38,6 +38,7 @@ const createArticle = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
 
 const updateArticle = async (req, res) => {
   try {

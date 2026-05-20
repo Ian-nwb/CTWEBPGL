@@ -7,7 +7,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { fetchUsers, createUser, updateUser } from '../../services/userService';
+import { fetchUsers, createUser, updateUser , deleteUser} from '../../services/userService';
 
 const modalStyle = {
   position: 'absolute',
@@ -115,6 +115,18 @@ const UsersPage = () => {
       loadUsers(); // Reload users after toggling
     } catch (error) {
       console.error('Error toggling user status:', error);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (isEditing && editUserId) {
+      try {
+        await deleteUser(editUserId);
+        loadUsers();
+        handleClose(); 
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
     }
   };
 
@@ -234,8 +246,9 @@ const UsersPage = () => {
                     onChange={(e) => setNewUser({ ...newUser, gender: e.target.value })}
                     IconComponent={ExpandMoreIcon}
                   >
-                    <MenuItem value="Male">Male</MenuItem>
-                    <MenuItem value="Female">Female</MenuItem>
+                    <MenuItem value="male">male</MenuItem>
+                    <MenuItem value="female">female</MenuItem>
+                    <MenuItem value="other">other</MenuItem>  
                   </Select>
                 </FormControl>
               </Stack>
@@ -299,7 +312,7 @@ const UsersPage = () => {
                   onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
                 />
               </Box>
-              {/* Password */}
+              {/* Password
               <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
                 <AccountCircle sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
                 <TextField 
@@ -310,7 +323,7 @@ const UsersPage = () => {
                   value={newUser.password}
                   onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                 />
-              </Box>
+              </Box> */}
             </FormControl>
             <Stack spacing={2} direction="row">
               <Button variant="outlined" onClick={handleClose}>
@@ -318,6 +331,9 @@ const UsersPage = () => {
               </Button>
               <Button variant="contained" onClick={handleSaveUser}>
                 {isEditing ? 'Save Changes' : 'Add'}
+              </Button>
+              <Button variant="contained" color="error" onClick={handleDeleteUser}>
+                Delete
               </Button>
             </Stack>
           </Stack>

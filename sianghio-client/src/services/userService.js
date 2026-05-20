@@ -1,7 +1,7 @@
 import axios from 'axios';
 import constants from '../../constants';
 
-// API Access to Front-end JSON data transformation or decoder
+
 const API = axios.create({
   baseURL: `${constants.HOST}/users`,
 });
@@ -20,3 +20,4 @@ export const deleteUser = (id) => API.delete(`/${id}`);
 
 // Login user
 export const loginUser = (credentials) => API.post('/login', credentials);
+

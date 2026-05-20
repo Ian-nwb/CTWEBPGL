@@ -99,7 +99,6 @@ const DashArticleListPage = () => {
 
   const handleSaveArticle = async () => {
     try {
-      // Backend expects specific keys: name, title, imageUrl, content
       const payload = {
         name: newArticle.name,
         title: newArticle.title,
@@ -116,14 +115,14 @@ const DashArticleListPage = () => {
       handleClose();
     } catch (error) {
       console.error("Error saving article:", error);
-      const errorMsg = error.response?.data?.message || "Check if Slug is unique and all fields are filled.";
+      const errorMsg = error.response?.data?.message || "Check if URL Name is unique and all fields are filled.";
       alert("Failed to save article: " + errorMsg);
     }
   };
 
   const columns = [
     { field: "title", headerName: "Title", flex: 1.5 },
-    { field: "name", headerName: "Slug", flex: 1 },
+    { field: "name", headerName: "URL Name", flex: 1 },
     { 
       field: "content", 
       headerName: "Paragraphs", 
@@ -193,7 +192,7 @@ const DashArticleListPage = () => {
               onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
             />
             <TextField
-              label="Slug (URL Name)"
+              label="(URL Name)"
               placeholder="e.g. scaling-startup-systems"
               fullWidth
               value={newArticle.name}
