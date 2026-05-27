@@ -9,9 +9,6 @@ const userRoutes = require("./routes/userRoutes");
 const articleRoutes = require("./routes/articleRoutes");
 const app = express();
 
-// Establish serverless-optimized connection
-connectDB();
-
 // Global Middleware
 app.use(express.json());
 app.use(jsonParser);
@@ -28,14 +25,30 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Routes
-app.use("/api/users", userRoutes);
-app.use("/api/articles", articleRoutes);
+// 🛠️ FIX: Serverless Connection Middleware
+// This forces Express to wait for connectDB() to completely resolve 
+// before letting incoming requests hit your route handlers.
+const ensureDbConnected = async (req, res, next) => {
+  try {
+    await connectDB(); // Reuses cached connection or resolves the active promise
+    next();
+  } catch (err) {
+    console.error("❌ Database connection middleware error:", err.message);
+    res.status(500).json({ 
+      message: "Database connection failed", 
+      error: err.message 
+    });
+  }
+};
 
 // Root benchmark endpoint (Great for testing if Vercel is live)
 app.get("/", (req, res) => {
   res.status(200).json({ status: "healthy", message: "Server is running perfectly on Vercel!" });
 });
+
+// Applied the connection middleware specifically to your database-driven routes
+app.use("/api/users", ensureDbConnected, userRoutes);
+app.use("/api/articles", ensureDbConnected, articleRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
