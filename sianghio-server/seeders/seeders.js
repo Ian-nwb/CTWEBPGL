@@ -1,5 +1,9 @@
-const mongoose = require("mongoose");
+/**
+ * Name: seed.js
+ * Location: server/scripts/seed.js (or adjust based on your project structure)
+ */
 const bcrypt = require("bcryptjs");
+const connectDB = require("../config/db"); // 1. IMPORT YOUR CACHED DB CONFIG
 const User = require("../models/User");
 
 const users = [
@@ -22,7 +26,7 @@ const users = [
     age: 31,
     gender: "male",
     contactNumber: "09182345678",
-    email: "marco.santos@robles.dev",
+    email: "marco.santos@robles.dev", // 2. FIXED EMAIL TYPO ("C")
     role: "viewer",
     username: "marcosantos",
     password: "Marco123!",
@@ -85,14 +89,13 @@ const users = [
 
 const seedDatabase = async () => {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/webprog");
+    // 3. CONNECT TO THE REAL DB VIA YOUR ENV CONFIG
+    await connectDB(); 
 
-    console.log("MongoDB Connected");
-
-
+    console.log("🧹 Clearing old users out of the collection...");
     await User.deleteMany();
 
-
+    console.log("🔒 Hashing user passwords...");
     const hashedUsers = await Promise.all(
       users.map(async (user) => ({
         ...user,
@@ -100,14 +103,16 @@ const seedDatabase = async () => {
       }))
     );
 
-
+    console.log("🌱 Inserting fresh seeds into Atlas...");
     await User.insertMany(hashedUsers);
 
-    console.log("Users seeded successfully!");
-
-    mongoose.connection.close();
+    console.log("✅ Users seeded successfully!");
+    
+    // 4. EXIT PROCESS CLEANLY
+    process.exit(0);
   } catch (error) {
-    console.error("Seeder error:", error);
+    console.error("❌ Seeder error:", error);
+    process.exit(1);
   }
 };
 
