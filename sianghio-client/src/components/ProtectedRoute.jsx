@@ -11,13 +11,13 @@ const ProtectedRoute = () => {
   }
 
   // 2. Block Viewer
-  if (user.type === "viewer") {
+  if (user.role === "viewer") {
     localStorage.removeItem("user"); // Clean up
     return <Navigate to="/auth/signin" replace />;
   }
 
   // 3. Block Editor from Users Page
-  if (user.type === "editor" && location.pathname.includes("/dashboard/users")) {
+  if (user.role === "editor" && location.pathname.includes("/dashboard/users")) {
     return <Navigate to="/dashboard" replace />; // Send back to main dashboard
   }
 

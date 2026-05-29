@@ -20,16 +20,16 @@ const handleLogin = async (e) => {
 
   try {
     const response = await loginUser(formData);
-    const { token, firstName, type } = response.data;
+    const { token, firstName, role } = response.data;
 
     // ENHANCEMENT: Block viewers from entering the workspace
-    if (type === "viewer") {
+    if (role === "viewer") {
       setError("Viewers are not permitted to access the dashboard.");
       setIsLoading(false);
       return; // Stop here, do not save to localStorage
     }
 
-    const userData = { firstName, type, token };
+    const userData = { firstName, role, token };
     localStorage.setItem('user', JSON.stringify(userData));
 
     navigate('/dashboard', { state: userData });

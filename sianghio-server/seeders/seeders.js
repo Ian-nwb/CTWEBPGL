@@ -5,7 +5,7 @@
 const bcrypt = require("bcryptjs");
 const connectDB = require("../config/db"); // 1. IMPORT YOUR CACHED DB CONFIG
 const User = require("../models/User");
-
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const users = [
   {
     firstName: "Alicia",

@@ -234,8 +234,8 @@ const DashLayout = () => {
           <Divider />
           <List>
             {dashboardNavItems
-              // 3. FILTER: If item is isAdminOnly, only show it if user.type is "admin"
-              .filter(item => !item.isAdminOnly || user?.type === "admin")
+              // 3. FILTER: If item is isAdminOnly, only show it if user.role is "admin"
+              .filter(item => !item.isAdminOnly || user?.role === "admin")
               .map(({ label, to, icon: Icon }) => (
                 <ListItem key={to} disablePadding sx={{ display: "block" }}>
                   <ListItemButton

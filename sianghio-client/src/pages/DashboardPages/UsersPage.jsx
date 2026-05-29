@@ -140,7 +140,7 @@ const UsersPage = () => {
     { field: 'age', headerName: 'Age', flex: 1, sortable: true },
     { field: 'gender', headerName: 'Gender', flex: 1, sortable: true },
     { field: 'email', headerName: 'Email', flex: 1 },
-    { field: 'type', headerName: 'Type', flex: 1, sortable: true },
+    { field: 'role', headerName: 'role', flex: 1, sortable: true },
     { field: 'contactNumber', headerName: 'Contact', flex: 1 },
     { field: 'username', headerName: 'Username', flex: 1 },
     { field: 'address', headerName: 'Address', flex: 1 },
@@ -292,8 +292,8 @@ const UsersPage = () => {
                   <InputLabel id="type-label">Type</InputLabel>
                   <Select
                     labelId="type-label"
-                    value={newUser.type || 'viewer'}
-                    onChange={(e) => setNewUser({ ...newUser, type: e.target.value })}
+                    value={newUser.role || 'viewer'}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                   >
                     <MenuItem value="admin">Admin</MenuItem>
                     <MenuItem value="editor">Editor</MenuItem>

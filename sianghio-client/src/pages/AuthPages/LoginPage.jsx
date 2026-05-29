@@ -19,10 +19,10 @@ function LoginPage() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('firstName', data.firstName);
-      localStorage.setItem('type', data.type); // user this for dynamic rendering
+      localStorage.setItem('role', data.role); // user this for dynamic rendering
 
-      // Navigate to the dashboard with the user's email and type
-      navigate('/dashboard', { state: { firstName: data.firstName, type: data.type } });
+      // Navigate to the dashboard with the user's email and role
+      navigate('/dashboard', { state: { firstName: data.firstName, role: data.role } });
     } catch (err) {
       console.error('Login failed:', err.response?.data?.message || err.message);
       setError(err.response?.data?.message || 'Login failed. Please try again.');

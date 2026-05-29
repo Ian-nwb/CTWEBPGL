@@ -32,12 +32,12 @@ const SignUpPage = () => {
 
     try {
       const response = await axios.post(`${constants.HOST}/users/register`, formData);
-      const { token, firstName, type } = response.data;
+      const { token, firstName, role } = response.data;
 
-      localStorage.setItem('user', JSON.stringify({ firstName, type, token }));
+      localStorage.setItem('user', JSON.stringify({ firstName, role, token }));
 
       // Redirect based on role
-      if (type === 'viewer') {
+      if (role === 'viewer') {
         navigate('/articles');
       } else {
         navigate('/dashboard');
