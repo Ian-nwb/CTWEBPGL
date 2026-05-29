@@ -82,12 +82,12 @@ const loginUser = async (req, res) => {
 
     
     const token = jwt.sign(
-      { id: user._id, email: user.email, type: user.type }, 
+      { id: user._id, email: user.email, role: user.role }, 
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ message: 'Login successful', token, type: user.type, firstName: user.firstName }); 
+    res.json({ message: 'Login successful', token, role: user.role, firstName: user.firstName }); 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -139,12 +139,12 @@ const registerUser = async (req, res) => {
       contactNumber,
       username,
       address,
-      type: 'viewer', 
+      role: 'viewer', 
       isActive: true
     });
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, type: user.type },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -152,7 +152,7 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       message: 'Registration successful',
       token,
-      type: user.type,
+      role: user.role,
       firstName: user.firstName
     });
 
