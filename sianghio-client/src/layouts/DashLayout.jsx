@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { styled, useTheme, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
@@ -10,9 +9,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import InputBase from "@mui/material/InputBase";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
@@ -22,42 +21,19 @@ import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import Button from "@mui/material/Button";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import ArticleIcon from "@mui/icons-material/Article";
+import Button from "@mui/material/Button";
+import { styled, useTheme } from "@mui/material/styles";
 
 const drawerWidth = 248;
 
-// --- UPDATED NAVIGATION ITEMS WITH ROLES ---
 const dashboardNavItems = [
-  {
-    label: "Dashboard",
-    title: "Dashboard",
-    to: "/dashboard",
-    icon: DashboardIcon,
-  },
-  {
-    label: "Articles",
-    title: "Articles",
-    to: "/dashboard/articles", 
-    icon: ArticleIcon,
-  },
-  {
-    label: "Reports",
-    title: "Reports",
-    to: "/dashboard/reports",
-    icon: AssessmentIcon,
-  },
-  {
-    label: "Users",
-    title: "Users",
-    to: "/dashboard/users",
-    icon: PeopleIcon,
-    isAdminOnly: true, // Tag this item for restriction
-  },
+  { label: "Dashboard", title: "Dashboard", to: "/dashboard", icon: DashboardIcon },
+  { label: "Articles", title: "Articles", to: "/dashboard/articles", icon: ArticleIcon },
+  { label: "Reports", title: "Reports", to: "/dashboard/reports", icon: AssessmentIcon },
+  { label: "Users", title: "Users", to: "/dashboard/users", icon: PeopleIcon, isAdminOnly: true },
 ];
 
-// ... (Mixins and Styled Components remain exactly as you have them)
 const openedMixin = (theme) => ({
   width: drawerWidth,
   transition: theme.transitions.create("width", {
@@ -91,6 +67,10 @@ const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: "#fff",
+  color: "#000",
+  boxShadow: "none",
+  borderBottom: "1px solid #ccc",
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -122,45 +102,6 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
-
 const getPageTitle = (pathname) =>
   dashboardNavItems.find(({ to }) => to === pathname)?.title ?? "Welcome";
 
@@ -170,108 +111,104 @@ const DashLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. Get current user from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
-  
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   const pageTitle = getPageTitle(location.pathname);
 
-  const handleDrawerOpen = () => setOpen(true);
-  const handleDrawerClose = () => setOpen(false);
-
-  const handleLogout = () => {
-    // 2. Clear user data and redirect
-    localStorage.removeItem("user");
-    navigate("/auth/signin");
-  };
-
   return (
-    <>
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        <AppBar position="fixed" open={open}>
-          <Toolbar>
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+
+      <AppBar position="fixed" open={open}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton
               color="inherit"
-              aria-label="open drawer"
-              onClick={open ? handleDrawerClose : handleDrawerOpen}
+              onClick={() => setOpen(true)}
               edge="start"
-              sx={{ marginRight: 5, ...(open && { display: "none" }) }}
+              sx={{ ...(open && { display: "none" }) }}
             >
-              {open ? <MenuOpenIcon /> : <MenuIcon />}
+              <MenuIcon />
             </IconButton>
+
             <Typography
+              component={Link}
+              to="/dashboard"
               variant="h6"
-              noWrap
-              component="div"
-              sx={{ flexGrow: 1 }}
+              sx={{ textDecoration: "none", color: "inherit", fontWeight: "normal" }}
             >
               {pageTitle}
             </Typography>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search>
-            <Button color="inherit" variant="outlined" onClick={handleLogout}>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", border: "1px solid #ccc", px: 1 }}>
+              <SearchIcon fontSize="small" />
+              <InputBase placeholder="Search…" sx={{ ml: 1 }} inputProps={{ "aria-label": "search" }} />
+            </Box>
+
+            <Button
+              variant="outlined"
+              size="small"
+              color="inherit"
+              onClick={() => {
+                localStorage.removeItem("user");
+                navigate("/auth/signin");
+              }}
+              sx={{ borderRadius: 0, borderColor: "#ccc", textTransform: "none" }}
+            >
               Logout
             </Button>
-          </Toolbar>
-        </AppBar>
-        <Drawer variant="permanent" open={open}>
-          <DrawerHeader>
-            <IconButton onClick={handleDrawerClose}>
-              {theme.direction === "rtl" ? (
-                <ChevronRightIcon />
-              ) : (
-                <ChevronLeftIcon />
-              )}
-            </IconButton>
-          </DrawerHeader>
-          <Divider />
-          <List>
-            {dashboardNavItems
-              // 3. FILTER: If item is isAdminOnly, only show it if user.role is "admin"
-              .filter(item => !item.isAdminOnly || user?.role === "admin")
-              .map(({ label, to, icon: Icon }) => (
-                <ListItem key={to} disablePadding sx={{ display: "block" }}>
-                  <ListItemButton
-                    component={Link}
-                    to={to}
-                    selected={location.pathname === to}
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer variant="permanent" open={open}>
+        <DrawerHeader>
+          <IconButton onClick={() => setOpen(false)}>
+            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </DrawerHeader>
+        <Divider />
+
+        <List>
+          {dashboardNavItems
+            .filter((item) => !item.isAdminOnly || user?.role === "admin")
+            .map(({ label, to, icon: Icon }) => (
+              <ListItem key={to} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  component={Link}
+                  to={to}
+                  selected={location.pathname === to}
+                  sx={{
+                    minHeight: 48,
+                    px: 2.5,
+                    justifyContent: open ? "initial" : "center",
+                  }}
+                >
+                  <ListItemIcon
                     sx={{
-                      minHeight: 48,
-                      px: 2.5,
-                      justifyContent: open ? "initial" : "center",
+                      minWidth: 0,
+                      mr: open ? 3 : "auto",
+                      justifyContent: "center",
                     }}
                   >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 0,
-                        mr: open ? 3 : "auto",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={label}
-                      sx={{ opacity: open ? 1 : 0 }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-          </List>
-        </Drawer>
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <DrawerHeader />
-          <Outlet />
-        </Box>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={label}
+                    sx={{ opacity: open ? 1 : 0 }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+        </List>
+      </Drawer>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: "#f9f9f9", minHeight: "100vh" }}>
+        <DrawerHeader />
+        <Outlet />
       </Box>
-    </>
+    </Box>
   );
 };
 

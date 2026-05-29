@@ -10,6 +10,6 @@ router.route('/:id').put(updateUser).delete(deleteUser);
 
 router.post('/login', loginUser);
 
-router.post('/register', createUser);
+router.post('/register', registerUser);
 
 module.exports = router;

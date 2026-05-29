@@ -3,9 +3,10 @@
  * Location: server/scripts/seed.js (or adjust based on your project structure)
  */
 const bcrypt = require("bcryptjs");
+require("dotenv").config();
 const connectDB = require("../config/db"); // 1. IMPORT YOUR CACHED DB CONFIG
 const User = require("../models/User");
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const users = [
   {
     firstName: "Alicia",
@@ -44,7 +45,7 @@ const users = [
     username: "biancacruz",
     password: "Bianca123!",
     address: "Quezon City, Metro Manila",
-    isActive: false,
+    isActive: true,
   },
   {
     firstName: "Nathan",
